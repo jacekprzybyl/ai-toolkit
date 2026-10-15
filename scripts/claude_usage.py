@@ -11,9 +11,11 @@ rewritten here. Native Claude owns token rotation and its concurrent locks.
 
 from __future__ import annotations
 
+import email.utils
 import hashlib
 import http.client
 import json
+import math
 import os
 import re
 import subprocess
@@ -29,11 +31,16 @@ from typing import Any
 IS_MACOS = sys.platform == "darwin"
 USAGE_URL = "https://api.anthropic.com/api/oauth/usage"
 MAX_BYTES = 65_536
+MAX_RETRY_AFTER = 7 * 86_400
 WINDOW_NAMES = ("five_hour", "seven_day")
 
 
 class UsageError(Exception):
     """A fixed error code that never contains provider messages or credentials."""
+
+    def __init__(self, code: str, retry_after: int | None = None) -> None:
+        super().__init__(code)
+        self.retry_after = retry_after
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -110,6 +117,25 @@ def access_token(credentials: dict[str, object]) -> str:
     return token
 
 
+def retry_after(headers: Any) -> int | None:
+    """Parse Retry-After as delay seconds or an HTTP date; reject anything else."""
+    value = headers.get("Retry-After") if headers is not None else None
+    if not isinstance(value, str):
+        return None
+    value = value.strip()
+    if re.fullmatch(r"[0-9]{1,9}", value):
+        seconds = int(value)
+    else:
+        try:
+            moment = email.utils.parsedate_to_datetime(value)
+        except (TypeError, ValueError, IndexError):
+            return None
+        if moment.tzinfo is None:
+            return None
+        seconds = math.ceil(moment.timestamp() - time.time())
+    return seconds if 0 <= seconds <= MAX_RETRY_AFTER else None
+
+
 def request_usage(config_dir: str | None, timeout: float) -> dict[str, object]:
     deadline = time.monotonic() + timeout
     token = access_token(read_credentials(config_dir, timeout))
@@ -128,8 +154,9 @@ def request_usage(config_dir: str | None, timeout: float) -> dict[str, object]:
     except urllib.error.HTTPError as error:
         code = {401: "authentication_expired", 403: "permission_denied", 429: "rate_limited"}.get(
             error.code, "request_failed")
+        delay = retry_after(error.headers)
         error.close()
-        raise UsageError(code) from None
+        raise UsageError(code, delay) from None
     if len(raw) > MAX_BYTES:
         raise UsageError("invalid_response")
     try:
@@ -165,9 +192,12 @@ def quota_windows(result: dict[str, object]) -> dict[str, dict[str, object]]:
     return windows
 
 
-def failed_usage(code: str) -> dict[str, object]:
-    return {"state": "error", "observed_at": None, "age_seconds": None, "windows": {},
-            "refreshed": False, "refresh_error": code}
+def failed_usage(code: str, retry_after: int | None = None) -> dict[str, object]:
+    result: dict[str, object] = {"state": "error", "observed_at": None, "age_seconds": None, "windows": {},
+                                 "refreshed": False, "refresh_error": code}
+    if retry_after is not None:
+        result["retry_after_seconds"] = retry_after
+    return result
 
 
 def refresh_usage(config_dir: str | None, *, timeout: float = 10) -> dict[str, object]:
@@ -181,7 +211,7 @@ def refresh_usage(config_dir: str | None, *, timeout: float = 10) -> dict[str, o
         return {"state": "live", "observed_at": time.time(), "age_seconds": 0.0,
                 "windows": windows, "refreshed": True}
     except UsageError as error:
-        return failed_usage(str(error))
+        return failed_usage(str(error), error.retry_after)
     except (TimeoutError, subprocess.TimeoutExpired):
         return failed_usage("timeout")
     except http.client.HTTPException:

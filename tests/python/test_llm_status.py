@@ -75,7 +75,7 @@ def request_usage(config_dir, timeout):
         stream.write('GET /api/oauth/usage\\n')
     result = json.loads((directory / 'live-response.json').read_text())
     if 'error' in result:
-        raise claude_usage.UsageError(result['error'])
+        raise claude_usage.UsageError(result['error'], result.get('retry_after'))
     return result
 claude_usage.request_usage = request_usage
 '''
@@ -202,3 +202,18 @@ def test_new_claude_response_is_fetched_then_failure_never_shows_last_value(conf
     assert '85%' not in result.stdout
     assert '37%' in result.stdout
     assert not (data / 'claude-usage').exists()
+
+
+def test_rate_limit_shows_retry_delay_once_per_account(configured):
+    home, _, _, _ = configured
+    (home / '.claude/live-response.json').write_text(json.dumps({'error': 'rate_limited', 'retry_after': 2431}))
+    result = run(configured, '--color', 'never')
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.count('rate_limited') == 1
+    assert 'Unavailable: rate_limited, retry in 40m' in result.stdout
+    assert 'Unavailable: not_authenticated' in result.stdout
+    assert 'refresh failed' not in result.stdout
+    status = json.loads(run(configured, '--json').stdout)
+    usage = status['providers']['claude']['accounts'][0]['usage']
+    assert usage['refresh_error'] == 'rate_limited' and usage['retry_after_seconds'] == 2431
+    assert usage['windows'] == {}

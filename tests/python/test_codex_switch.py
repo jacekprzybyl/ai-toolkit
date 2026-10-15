@@ -385,7 +385,8 @@ def test_status_isolates_profiles_and_continues_after_account_failure(refresh_ac
             assert rows[name]["usage"]["state"] == "live"
             assert rows[name]["usage"]["windows"]["five_hour"]["used_percentage"] == percentage
     else:
-        assert "infinity: refresh failed (not_authenticated)" in result.stdout
+        assert "Unavailable: not_authenticated" in result.stdout
+        assert "refresh failed" not in result.stdout
         assert "17%" in result.stdout and "63%" in result.stdout
     for name, home in homes.items():
         metadata = json.loads((home / "environment.json").read_text())

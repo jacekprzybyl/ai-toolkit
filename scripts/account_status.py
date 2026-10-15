@@ -99,6 +99,9 @@ def print_account_row(account: AccountStatus, width: int, color: bool) -> None:
     usage = account["usage"]
     if not usage.get("windows"):
         label = "Unavailable: " + str(usage.get("refresh_error", "usage_unavailable"))
+        retry = usage.get("retry_after_seconds")
+        if isinstance(retry, int) and not isinstance(retry, bool):
+            label += f", retry in {duration(retry)}"
         name = name if len(name) <= 22 else name[:21] + "…"
         if width < 86:
             print("  " + paint(name, "active", color))

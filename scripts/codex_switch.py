@@ -217,9 +217,6 @@ def show_status(registry: Registry, options: argparse.Namespace) -> None:
                           "accounts": accounts}))
     else:
         print_status(selected, accounts, verbose=options.verbose, color_mode=options.color, title="CODEX ACCOUNTS")
-        for account in accounts:
-            if account["usage"].get("refresh_error"):
-                print(f"  {account['name']}: refresh failed ({account['usage']['refresh_error']})")
 
 
 def parser() -> argparse.ArgumentParser:

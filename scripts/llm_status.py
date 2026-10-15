@@ -59,10 +59,6 @@ def print_provider(name: str, provider: ProviderStatus, options: argparse.Namesp
         return
     print_status(selected, provider["accounts"], verbose=options.verbose,
                  color_mode=options.color, title=title)
-    for account in provider["accounts"]:
-        error = account["usage"].get("refresh_error")
-        if error:
-            print(f"  {name}/{account['name']}: refresh failed ({error})")
 
 
 def main(argv: list[str] | None = None) -> int:

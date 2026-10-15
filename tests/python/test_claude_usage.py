@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import email.utils
 import hashlib
 import http.client
 import io
@@ -100,7 +101,30 @@ def test_http_errors_are_sanitized_without_old_values(profile, monkeypatch, code
     usage = claude_usage.refresh_usage(profile)
     assert usage["refresh_error"] == expected
     assert usage["windows"] == {}
+    assert "retry_after_seconds" not in usage
     assert "SECRET" not in json.dumps(usage)
+
+
+@pytest.mark.parametrize("header,expected", [
+    ("2431", 2431), (" 0 ", 0), ("604800", 604800),
+    ("SECRET", None), ("-5", None), ("604801", None), ("1.5", None), ("²", None),
+    ("Wed, 21 Oct 2015 07:28:00", None),
+])
+def test_rate_limit_reports_sanitized_retry_after(profile, monkeypatch, header, expected):
+    error = urllib.error.HTTPError(claude_usage.USAGE_URL, 429, "SECRET", {"Retry-After": header}, io.BytesIO(b""))
+    opener(monkeypatch, error=error)
+    usage = claude_usage.refresh_usage(profile)
+    assert usage["refresh_error"] == "rate_limited"
+    assert usage.get("retry_after_seconds") == expected
+    assert usage["windows"] == {} and usage["observed_at"] is None
+    assert "SECRET" not in json.dumps(usage)
+
+
+def test_retry_after_accepts_http_date(profile, monkeypatch):
+    moment = email.utils.formatdate(time.time() + 600, usegmt=True)
+    error = urllib.error.HTTPError(claude_usage.USAGE_URL, 429, "SECRET", {"Retry-After": moment}, io.BytesIO(b""))
+    opener(monkeypatch, error=error)
+    assert 595 <= claude_usage.refresh_usage(profile)["retry_after_seconds"] <= 601
 
 
 @pytest.mark.parametrize("error,expected", [
