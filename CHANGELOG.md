@@ -7,6 +7,31 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## v5.4.1 - Retry delay for rate-limited usage reads (2026-10-15)
+
+### Changed
+
+- **Publish workflow:** `actions/setup-node` 7.0.0 to 7.1.0 (#37) in
+  `publish.yml` and the composite `action.yml`, pinned by commit SHA
+  (verified against the upstream `v7.1.0` tag).
+- **One error line per account:** `llm-status` and `codex-switch status` no
+  longer print a separate `<account>: refresh failed (<code>)` line under the
+  table; the code stays in the account's `Unavailable:` row. JSON output is
+  unchanged apart from the field below.
+
+### Fixed
+
+- **No retry time on a rate-limited usage read:** `scripts/claude_usage.py`
+  dropped the provider's `Retry-After` header on HTTP 429, so `llm-status`
+  showed `rate_limited` without saying when the endpoint accepts requests
+  again. A valid header (delay seconds or HTTP date, at most seven days) now
+  shows as `Unavailable: rate_limited, retry in 40m` and adds
+  `retry_after_seconds` to the account's JSON `usage`. Other header values are
+  dropped. `rate_limited` refers to the usage endpoint, not an exhausted
+  subscription limit (`kb/howto/claude-account-profiles.md`).
+
+---
+
 ## v5.4.0 - Remaining DSH code removed (2026-10-10)
 
 Development of the SoftSpark DSH plugins has ended and their repositories are

@@ -6615,7 +6615,9 @@ The reader uses the profile's macOS Keychain entry or native `.credentials.json`
 file. Requests time out after 10 seconds per profile. It does not renew OAuth
 tokens or modify credential storage. `authentication_expired` requires a native
 login through `ai-toolkit claude-switch login NAME`; `rate_limited` means the provider
-refused the current request. `--refresh` is an alias for normal live status.
+refused the current request to the usage endpoint, not that the subscription limit
+is exhausted. When the provider sends `Retry-After`, the row reads
+`Unavailable: rate_limited, retry in 40m`. `--refresh` is an alias for normal live status.
 
 Missing windows display `not provided` and are omitted from JSON, never zero.
 Authentication, network and
@@ -6631,7 +6633,9 @@ unchanged; the toolkit status line no longer collects quota snapshots.
 In JSON, `usage.state` is `live` after a successful fetch or `error` after a
 failure. Successful reads include `observed_at`, `age_seconds`, `windows`
 and `refreshed: true`. Failed reads contain empty `windows`, null timestamps,
-`refreshed: false` and a sanitized `refresh_error` code.
+`refreshed: false` and a sanitized `refresh_error` code. A refusal with a valid
+`Retry-After` header (delay seconds or HTTP date, at most seven days) adds
+`retry_after_seconds`; other header values are dropped.
 
 ## Verification
 

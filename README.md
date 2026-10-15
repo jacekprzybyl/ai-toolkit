@@ -8,14 +8,17 @@
 [![Agents](https://img.shields.io/badge/agents-44-blue)](app/agents/)
 [![Tests](https://img.shields.io/badge/tests-2003%20passing-success)](tests/)
 
-## What's New in v5.4.0
+## What's New in v5.4.1
 
-- **The last DeepSeek Harness (DSH) code is gone.** `ai-toolkit dsh` is an
+- **`llm-status` says when to retry a rate-limited account.** A refused usage
+  read shows `Unavailable: rate_limited, retry in 40m` from the provider's
+  `Retry-After` header (`retry_after_seconds` in JSON), once per account.
+- **The last DeepSeek Harness (DSH) code is gone (v5.4.0).** `ai-toolkit dsh` is an
   unknown command and `--editors dsh` an unknown editor; the toolkit no longer
   migrates old DSH project skills or registry entries. Run `ai-toolkit update`
   once on 5.3.5 first if a project still carries them, see the
   [removal note](kb/history/completed/dsh-integration-removed-20261010.md).
-- **`inject-mcp` reaches every Claude Code profile.** Injected servers such as
+- **`inject-mcp` reaches every Claude Code profile (v5.4.0).** Injected servers such as
   `rag-mcp` are written to each `claude-switch` profile, like `mcp install`
   does; `remove-mcp` and `uninstall` clean them there too.
 - **No orphaned `## Project Constitution` heading (v5.3.5).** It now leaves `CLAUDE.md`
