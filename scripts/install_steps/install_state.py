@@ -390,7 +390,9 @@ def _open_stable_state_file(
             )
         else:
             named_before = path.stat(follow_symlinks=False)
-            flags = os.O_RDONLY
+            # Binary on Windows: a text-mode read folds CRLF and returns fewer
+            # bytes than st_size, which looks like a state change mid-read.
+            flags = os.O_RDONLY | getattr(os, "O_BINARY", 0)
             if hasattr(os, "O_NOFOLLOW"):
                 flags |= os.O_NOFOLLOW
             descriptor = os.open(path, flags)

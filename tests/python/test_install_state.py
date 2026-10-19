@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2024-2026 Lukasz Krzemien (biuro@softspark.eu)
 # Source: https://github.com/softspark/ai-toolkit
-"""Unit tests for the stable-read signature in scripts/install_steps/install_state.py.
+"""Unit tests for the stable state read in scripts/install_steps/install_state.py.
 
 Run: npm run test:py (pytest, config in pytest.ini).
 """
@@ -42,3 +42,14 @@ def test_posix_signature_still_detects_an_inode_change(monkeypatch: pytest.Monke
     after = install_state._state_file_signature(_metadata(6))
 
     assert before != after
+
+
+def test_state_with_crlf_line_endings_reads_back(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # The text-mode writer emits CRLF on Windows; the read must return every
+    # byte st_size declares instead of reporting the state as changed.
+    state_file = tmp_path / ".softspark" / "ai-toolkit" / "state.json"
+    state_file.parent.mkdir(parents=True)
+    state_file.write_bytes(b'{\r\n  "installed_version": "5.4.1"\r\n}\r\n')
+    monkeypatch.setattr(install_state, "STATE_FILE", state_file)
+
+    assert install_state._load_state_strict() == {"installed_version": "5.4.1"}
