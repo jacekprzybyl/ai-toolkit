@@ -44,7 +44,7 @@ def installation(tmp_path: Path) -> tuple[Path, Path, dict[str, str], dict[str, 
             "plugins": {PLUGIN_KEY: [{"scope": "user", "installPath": str(install)}]},
         },
     )
-    env = {"HOME": str(home), "CLAUDE_PROJECT_DIR": str(project)}
+    env = {"HOME": str(home), "USERPROFILE": str(home), "CLAUDE_PROJECT_DIR": str(project)}
     payload: dict[str, object] = {"hook_event_name": "SessionStart", "cwd": str(project)}
     return config, project, env, payload
 

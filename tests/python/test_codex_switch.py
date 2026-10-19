@@ -63,7 +63,7 @@ def installation(tmp_path):
                  "CODEX_SQLITE_HOME", "CODEX_ACCESS_TOKEN", "CODEX_API_KEY", "OPENAI_API_KEY",
                  "GIT_DIR", "GIT_WORK_TREE"):
         env.pop(name, None)
-    env.update(HOME=str(home), PATH=f"{binary}{os.pathsep}{env.get('PATH', '')}")
+    env.update(HOME=str(home), USERPROFILE=str(home), PATH=f"{binary}{os.pathsep}{env.get('PATH', '')}")
     executable = binary / "codex"
     # Reviewed fake: prints controlled routing metadata; never calls a provider.
     executable.write_text(

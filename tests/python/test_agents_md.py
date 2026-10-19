@@ -38,7 +38,7 @@ Use make deploy.
 
 def _adopt(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
     env = {k: v for k, v in os.environ.items() if k != "AI_TOOLKIT_USER_CWD"}
-    env.update(HOME=str(project.parent / "home"),
+    env.update(HOME=str(project.parent / "home"), USERPROFILE=str(project.parent / "home"),
                AI_TOOLKIT_HOME=str(project.parent / "home" / "toolkit-data"))
     return subprocess.run([sys.executable, str(SCRIPT), *args], cwd=project, env=env,
                           capture_output=True, text=True, timeout=60, check=False)
