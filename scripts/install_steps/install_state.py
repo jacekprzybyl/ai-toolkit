@@ -274,15 +274,23 @@ class _OpenedStableStateFile:
 
 
 def _state_file_signature(metadata: os.stat_result) -> tuple[int, ...]:
-    """Return the complete stable-read signature for one state file."""
-    return (
+    """Return the complete stable-read signature for one state file.
+
+    On Windows st_ctime is the creation time, not an inode change time, and
+    NTFS name tunneling can make the directory entry and the open handle
+    report different creation times for the same file after a rename-over
+    write, so it is left out of the signature there.
+    """
+    signature = (
         metadata.st_dev,
         metadata.st_ino,
         metadata.st_mode,
         metadata.st_size,
         metadata.st_mtime_ns,
-        metadata.st_ctime_ns,
     )
+    if os.name == "nt":
+        return signature
+    return (*signature, metadata.st_ctime_ns)
 
 
 def _read_declared_state_size(
