@@ -51,7 +51,7 @@ def test_delivered_hook_classifies_with_its_adjacent_helper(
     home = tmp_path / "home"
     home.mkdir()
     env = {
-        "HOME": str(home), "PATH": os.environ["PATH"],
+        "HOME": str(home), "USERPROFILE": str(home), "PATH": os.environ["PATH"],
         "PYTHONDONTWRITEBYTECODE": "1", "TOOLKIT_HOOK_PROFILE": "standard",
         "AI_TOOLKIT_HOOK_FORMAT": "json", "AI_TOOLKIT_HOOK_QUIET": "1",
         "AI_TOOLKIT_SEARCH_FIRST": "off",

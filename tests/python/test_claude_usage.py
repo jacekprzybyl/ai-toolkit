@@ -35,6 +35,7 @@ def response(percentage=23):
 @pytest.fixture(autouse=True)
 def isolated(tmp_path, monkeypatch):
     monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
     monkeypatch.delenv("CLAUDE_SECURESTORAGE_CONFIG_DIR", raising=False)
     monkeypatch.setattr(claude_usage, "IS_MACOS", False)
     def no_io(*args, **kwargs):

@@ -73,7 +73,7 @@ def installation(tmp_path: Path) -> Installation:
     for name in (*AUTH_ENV, "AI_TOOLKIT_HOME", "SOFTSPARK_HOME", "CLAUDE_SWITCH_CONFIG", "AI_TOOLKIT_USER_CWD",
                  "CLAUDE_CONFIG_DIR", "CLAUDE_SECURESTORAGE_CONFIG_DIR", "CLAUDECODE", "GIT_DIR", "GIT_WORK_TREE"):
         env.pop(name, None)
-    env.update(HOME=str(home), PATH=f"{executable_dir}{os.pathsep}{env.get('PATH', '')}")
+    env.update(HOME=str(home), USERPROFILE=str(home), PATH=f"{executable_dir}{os.pathsep}{env.get('PATH', '')}")
     fixtures = tmp_path / "usage-responses.json"
     fixtures.write_text("{}", encoding="utf-8")
     patches = tmp_path / "python-patches"

@@ -28,7 +28,7 @@ def _run(home: Path, code: str, **extra_env: str) -> subprocess.CompletedProcess
     env = {k: v for k, v in os.environ.items()
            if k not in {"CLAUDE_CONFIG_DIR", "CLAUDE_SWITCH_CONFIG", "AI_TOOLKIT_HOME", "SOFTSPARK_HOME",
                         "CODEX_HOME", "COPILOT_HOME", "CLAUDE_USER_DATA_DIR"}}
-    env.update(HOME=str(home), **extra_env)
+    env.update(HOME=str(home), USERPROFILE=str(home), **extra_env)
     return subprocess.run(
         [sys.executable, "-c", f"import sys; sys.path.insert(0, {str(SCRIPTS)!r})\n{code}"],
         env=env, capture_output=True, text=True, timeout=60, check=False,

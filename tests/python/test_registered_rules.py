@@ -42,6 +42,7 @@ def _env(home: Path) -> dict[str, str]:
     return {
         **os.environ,
         "HOME": str(home),
+        "USERPROFILE": str(home),
         "AI_TOOLKIT_HOME": str(home / ".softspark" / "ai-toolkit"),
     }
 

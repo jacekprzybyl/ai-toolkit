@@ -37,7 +37,7 @@ def _run(home: Path, *args: str) -> subprocess.CompletedProcess[str]:
         key: value for key, value in os.environ.items()
         if key not in {"CODEX_HOME", "AI_TOOLKIT_HOME", "SOFTSPARK_HOME", "COPILOT_HOME"}
     }
-    env["HOME"] = str(home)
+    env["HOME"] = env["USERPROFILE"] = str(home)
     result = subprocess.run(
         [sys.executable, *args], env=env, capture_output=True, text=True, timeout=300
     )

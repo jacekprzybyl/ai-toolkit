@@ -26,7 +26,7 @@ def configured(tmp_path):
         'CODEX_HOME', 'CODEX_SQLITE_HOME', 'CLAUDE_CONFIG_DIR', 'CODEX_API_KEY',
         'CODEX_ACCESS_TOKEN', 'OPENAI_API_KEY', 'NO_COLOR',
     )}
-    env.update(HOME=str(home), AI_TOOLKIT_HOME=str(data), COLUMNS='100',
+    env.update(HOME=str(home), USERPROFILE=str(home), AI_TOOLKIT_HOME=str(data), COLUMNS='100',
                CLAUDE_SWITCH_CONFIG=str(data / 'claude-switch.json'),
                CODEX_SWITCH_CONFIG=str(data / 'codex-switch.json'),
                PATH=str(binary) + os.pathsep + env['PATH'])

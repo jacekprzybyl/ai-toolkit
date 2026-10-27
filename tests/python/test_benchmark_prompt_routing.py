@@ -66,6 +66,7 @@ def test_minimal_output_is_rejected_even_if_it_contains_generic_category() -> No
 
 def test_actual_hook_benchmark_is_isolated_and_never_reports_prompts(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
     monkeypatch.setenv("BASH_ENV", str(tmp_path / "must-not-source"))
     monkeypatch.setenv("AI_TOOLKIT_DISABLED_HOOKS", "user-prompt-submit")
     data, _ = load_dataset(DEFAULT_DATASET)
