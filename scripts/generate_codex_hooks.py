@@ -138,6 +138,7 @@ CODEX_HOOKS: dict[str, list[tuple[str, str]]] = {
 
 HELPER_ASSETS = frozenset(
     {
+        "_codex-hook-dedup.py",
         "_hook-io.sh",
         "_locate-toolkit.sh",
         "_profile-check.sh",
@@ -146,6 +147,22 @@ HELPER_ASSETS = frozenset(
         "_session-paths.sh",
     }
 )
+
+# Deduplicate only toolkit advisory/state handlers, never tool permission
+# guards. Missing invocation identity always falls back to normal execution.
+DEDUPLICATED_ASSETS = frozenset({
+    "user-prompt-submit.sh", "track-usage.sh", "subagent-start.sh",
+    "subagent-stop.sh", "save-session.sh", "search-tracker.sh",
+    "codex-stop-search-check.sh",
+})
+CODEX_DEDUP_PROLOGUE = r'''# Pair identical global/project handlers for this exact invocation.
+_codex_hook_input=$(cat)
+if printf '%s' "$_codex_hook_input" | python3 -I -S "$(dirname "$0")/_codex-hook-dedup.py" "$0"; then
+    exit 0
+fi
+exec <<<"$_codex_hook_input"
+unset _codex_hook_input
+'''
 
 CODEX_STOP_SEARCH_ADAPTER = r"""#!/usr/bin/env bash
 # Normalize the shared search guard to Codex's continuation decision. Using
@@ -195,6 +212,7 @@ source "$(dirname "$0")/_hook-io.sh"
 
 INPUT=$(cat)
 SESSION_ID=$(hook_session_id)
+printf '%s' "$INPUT" | python3 -I -S "$(dirname "$0")/_codex-hook-dedup.py" --cleanup >/dev/null 2>&1 || true
 SESSION_STATE_CLI="${AI_TOOLKIT_SESSION_STATE_CLI:-$HOME/.softspark/ai-toolkit/scripts/session_state.py}"
 if [ "$SESSION_ID" != "default" ] &&
    [ -f "$SESSION_STATE_CLI" ] &&
@@ -298,7 +316,8 @@ def _command_for(script: str, global_install: bool) -> str:
         executable = (
             f'"$(git rev-parse --show-toplevel 2>/dev/null)/.codex/hooks/{script}"'
         )
-    return f"AI_TOOLKIT_HOOK_QUIET=1 {TOOLKIT_COMMAND_MARKER} {executable}"
+    output_format = "AI_TOOLKIT_HOOK_FORMAT=codex " if script == "subagent-stop.sh" else ""
+    return f"AI_TOOLKIT_HOOK_QUIET=1 {output_format}{TOOLKIT_COMMAND_MARKER} {executable}"
 
 
 def build_hooks_json(*, global_install: bool = False) -> dict[str, Any]:
@@ -538,7 +557,8 @@ def _managed_asset_content(name: str) -> bytes:
     lines = text.splitlines(keepends=True)
     marker_line = f"{SCRIPT_MARKER}\n"
     if lines and lines[0].startswith("#!"):
-        text = "".join((lines[0], marker_line, *lines[1:]))
+        prologue = CODEX_DEDUP_PROLOGUE if name in DEDUPLICATED_ASSETS else ""
+        text = "".join((lines[0], marker_line, prologue, *lines[1:]))
     else:
         text = marker_line + text
     return text.encode("utf-8")

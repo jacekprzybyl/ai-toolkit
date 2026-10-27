@@ -36,7 +36,7 @@ def test_every_legacy_workflow_keeps_its_slash_name_and_body(tmp_path: Path) -> 
         assert parse_frontmatter(text)["description"] == parse_frontmatter(render())["description"]
         assert split_frontmatter(render())[1] in text
         legacy = (tmp_path / ".agents/workflows" / filename).read_text()
-        assert "DEPRECATED: workflows retire 2026-11-01" in legacy
+        assert "DEPRECATED: workflows retired 2026-10-19" in legacy
         assert split_frontmatter(render())[1].strip() in legacy
     assert "codex" not in _detect_editors(tmp_path)
     assert "antigravity" in _detect_editors(tmp_path)

@@ -248,6 +248,46 @@ EOF
     ! echo "$cmd" | grep -q "ai-toolkit-statusline.sh"
 }
 
+@test "merge-hooks: replaces exact legacy idle reminders but preserves user variants" {
+    run python3 - "$TOOLKIT_DIR" "$TARGET" <<'PY'
+import copy
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+root, target = Path(sys.argv[1]), Path(sys.argv[2])
+short = "echo 'Teammate going idle. Verify: (1) All assigned files modified, (2) Tests written for changes, (3) Documentation updated if needed.'"
+long = short[:-1] + " Coordinator: once you have the last message you need from this agent (final report, any truncated tail), stop it (TaskStop) unless more work will be sent to it (constitution Article V.3).'"
+
+def entry(command, **extra):
+    return {"matcher": "", "hooks": [{"type": "command", "command": command}], **extra}
+
+custom = [entry("echo 'my idle reminder'"), entry(short + "; echo user-tail"),
+          entry(short, matcher="custom-agent")]
+mixed = entry(short)
+mixed["hooks"].append({"type": "command", "command": "echo user-handler"})
+custom.append(mixed)
+target.write_text(json.dumps({"theme": "user-theme", "hooks": {
+    "TeammateIdle": [entry(short), entry(long), *copy.deepcopy(custom)],
+    "Stop": [entry(short)],
+}}))
+command = [sys.executable, str(root / "scripts/merge-hooks.py")]
+for _ in range(2):
+    subprocess.run([*command, "inject", str(root / "app/hooks.json"), str(target)], check=True)
+    data = json.loads(target.read_text())
+    current = json.loads((root / "app/hooks.json").read_text())["hooks"]["TeammateIdle"]
+    assert data["hooks"]["TeammateIdle"] == [*custom, *current]
+    assert entry(short) in data["hooks"]["Stop"]
+    assert data["theme"] == "user-theme"
+subprocess.run([*command, "strip", str(target)], check=True)
+data = json.loads(target.read_text())
+assert data["hooks"]["TeammateIdle"] == custom
+assert data["hooks"]["Stop"] == [entry(short)]
+PY
+    [ "$status" -eq 0 ]
+}
+
 @test "merge-hooks: PRESERVES user-customized statusLine even with extra fields" {
     cat > "$TARGET" <<'EOF'
 {"statusLine":{"type":"command","command":"bash custom.sh","customField":"x"}}

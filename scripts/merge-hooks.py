@@ -58,6 +58,21 @@ LEGACY_TOOLKIT_HOOKS = {
             ],
         },
     ],
+    "TeammateIdle": [
+        {
+            "matcher": "",
+            "hooks": [{"type": "command", "command": command}],
+        }
+        for command in (
+            "echo 'Teammate going idle. Verify: (1) All assigned files modified, "
+            "(2) Tests written for changes, (3) Documentation updated if needed.'",
+            "echo 'Teammate going idle. Verify: (1) All assigned files modified, "
+            "(2) Tests written for changes, (3) Documentation updated if needed. "
+            "Coordinator: once you have the last message you need from this agent "
+            "(final report, any truncated tail), stop it (TaskStop) unless more work "
+            "will be sent to it (constitution Article V.3).'",
+        )
+    ],
 }
 
 # Hook scripts older releases installed and current releases no longer ship.

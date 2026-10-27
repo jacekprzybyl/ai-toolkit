@@ -4,7 +4,7 @@ category: reference
 service: ai-toolkit
 tags: [windows, wsl, install, uninstall, dependencies, hooks, security]
 created: "2026-04-24"
-last_updated: "2026-10-02"
+last_updated: "2026-10-27"
 description: "Windows support model for ai-toolkit: WSL, Git Bash, dependency detection, hooks, and fail-closed managed mutations."
 ---
 
@@ -67,8 +67,8 @@ Antigravity's new workflow-to-skill replacements also require these primitives.
 On native Windows, that optional generation step prints a WSL or
 `/migrate-workflows` instruction and skips the new skill writes, while preserving
 the existing legacy workflow and catalogue-pointer output. Use WSL to generate
-the replacements safely, or the Antigravity migration command before workflows
-retire on 2026-11-01. No unprotected transaction fallback is used.
+the replacements safely, or use the Antigravity migration command. Legacy
+workflows retired on 2026-10-19. No unprotected transaction fallback is used.
 
 ## Verification
 

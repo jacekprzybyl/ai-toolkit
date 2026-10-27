@@ -566,7 +566,7 @@ def check_antigravity_workflows(dr: DiagResult, project: Path | None = None, hom
             if not any(path.is_file() for path in replacements):
                 install_scope = "" if root == home / ".gemini/config" else " --local"
                 dr.warn(
-                    f"Antigravity workflow {workflow.name} retires 2026-11-01; "
+                    f"Antigravity workflow {workflow.name} retired 2026-10-19; "
                     "migrate it to a same-named skill with /migrate-workflows "
                     f"(toolkit commands: ai-toolkit install{install_scope} --editors antigravity)"
                 )

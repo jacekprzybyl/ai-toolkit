@@ -5,7 +5,7 @@ service: ai-toolkit
 tags: [skills, domain-knowledge, catalog, task-skills, hybrid-skills]
 version: "1.7.0"
 created: "2026-03-23"
-last_updated: "2026-09-23"
+last_updated: "2026-10-27"
 description: "Complete skills catalog with task, hybrid, and knowledge skills. Includes Codex adaptation notes, effort levels, skill-scoped hooks, executable scripts, security auditor, and persona presets."
 ---
 
@@ -15,6 +15,9 @@ Model-specific guidance and client/API boundaries are recorded in
 [Model Compatibility](model-compatibility.md). Claude skill `model` and `effort`
 fields do not automatically configure Codex or Copilot. Preserve the active
 selection and verify available capabilities before applying an override.
+The October 27 review includes GPT-6.1 Terra and the completed GPT-5.5
+retirement for ChatGPT-authenticated Codex sessions; it changes reference
+guidance, not the active client's model or permissions.
 
 All functionality is unified under skills. Task and hybrid skills are user-invocable as slash commands. Knowledge skills provide domain patterns auto-loaded by agents.
 

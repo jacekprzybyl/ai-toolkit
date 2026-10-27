@@ -9,6 +9,7 @@ Shared AI development toolkit for Claude Code, Claude Chat/Cowork, and 11 editor
 - Claude Chat/Desktop/Cowork does **not** scan Claude Code's `~/.claude/` files. Use `ai-toolkit claude-app export`, upload the ZIP in Customize > Plugins, and apply the generated Cowork global instructions. Skills work in Chat/Cowork; hooks and sub-agents are Cowork-only.
 - **KB-first is mandatory for technical work:** before answering or acting on a technical/project prompt, call `smart_query()` or `hybrid_search_kb()` and use the result to locate the relevant SOP/reference. Cite the KB path when the result materially informs the answer. If the KB tool is unavailable, state that explicitly and continue from local files.
 - Any rule that must be enforced at a fixed lifecycle point belongs in `app/hooks.json` + `app/hooks/*.sh` with tests. Instruction files are context, not enforcement.
+- Start Claude teammates at the trusted repository root and assign module paths as ownership. Confirm startup in the agent panel or exact tmux pane before waiting; hidden import/permission dialogs require the user's decision. See `kb/troubleshooting/claude-teammate-startup.md`.
 
 ## CRITICAL: Documentation & Count Accuracy
 **Every change to skills, agents, hooks, or editors MUST be reflected in ALL docs:**

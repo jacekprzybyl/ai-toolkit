@@ -1,5 +1,5 @@
 {
-  "last_run": "2026-10-10T07:16:47Z",
+  "last_run": "2026-10-27T19:48:01Z",
   "schema_version": 1,
   "tools": {
     "aider": {
@@ -24,7 +24,7 @@
       }
     },
     "augment": {
-      "docs_hash": "df4df52e361732f0",
+      "docs_hash": "5318418e753badcb",
       "headings": [
         "Admin",
         "Auggie CLI",
@@ -57,7 +57,7 @@
         "SKILL.md": false,
         "SessionEnd": false,
         "SessionStart": false,
-        "Stop": false,
+        "Stop": true,
         "agent_requested": false,
         "always_apply": false,
         "context engine": true,
@@ -66,7 +66,7 @@
       }
     },
     "claude-app": {
-      "docs_hash": "47778a1ef2f5c764",
+      "docs_hash": "1184c4b2def18f09",
       "headings": [
         "Add global and folder instructions",
         "Availability",
@@ -108,8 +108,9 @@
       }
     },
     "claude-code": {
-      "docs_hash": "40884482c4f81fcd",
+      "docs_hash": "00ccdd8ca05c9570",
       "headings": [
+        "Code review and pull requests",
         "Core concepts",
         "Documentation Index",
         "Getting started",
@@ -169,17 +170,17 @@
         "output style": true,
         "outputStyles": false,
         "plugins": true,
-        "settings.json": true,
+        "settings.json": false,
         "slash command": false,
         "sub-agent": true,
         "themes": true,
         "userConfig": false,
         "workflows": true
       },
-      "version": "2.1.296 (Claude Code)"
+      "version": "2.1.311 (Claude Code)"
     },
     "cline": {
-      "docs_hash": "47c604bd046914ce",
+      "docs_hash": "1ab1dad7ac1784d8",
       "headings": [
         "API Reference",
         "Best Practices",
@@ -227,7 +228,7 @@
       }
     },
     "codex-cli": {
-      "docs_hash": "ded62a9b7ccc36d7",
+      "docs_hash": "235969b507663c2e",
       "headings": [
         "API",
         "API Reference",
@@ -246,6 +247,7 @@
         "Build with voice",
         "Capabilities",
         "Categories",
+        "ChatGPT EDU",
         "ChatGPT Space",
         "ChatGPT Work",
         "ChatGPT plan usage",
@@ -273,9 +275,11 @@
         "Development workflows",
         "Docs agent",
         "Environments",
+        "Evaluation",
         "Explore",
         "Extend ChatGPT and Codex",
         "Extend and automate",
+        "Feature Configuration",
         "File Upload",
         "Fit Codex to your terminal",
         "Foundations",
@@ -324,6 +328,7 @@
         "Security and compliance",
         "See what Codex CLI can do",
         "Set the boundaries for each run",
+        "Sites",
         "Spaces",
         "Specialized models",
         "Split up a larger investigation",
@@ -375,13 +380,13 @@
         "plugin.json": false,
         "sandbox": true
       },
-      "version": "codex-cli 0.154.0"
+      "version": "codex-cli 0.164.0"
     },
     "cursor": {
-      "docs_hash": "9f524866515e42ba",
+      "docs_hash": "971c2118e599ba53",
       "headings": [
         "Agent",
-        "BDK",
+        "Agent SDK",
         "CLI",
         "Cloud Agents",
         "Command Palette",
@@ -412,7 +417,7 @@
       }
     },
     "gemini-cli": {
-      "docs_hash": "a51d4cf66d6b2f5a",
+      "docs_hash": "cb39e1afdf66f9fe",
       "headings": [
         "Breadcrumbs",
         "Directory actions",
@@ -453,17 +458,17 @@
       "version": "0.57.0"
     },
     "github-copilot": {
-      "docs_hash": "b898986d502c76bb",
+      "docs_hash": "faf62d408873e947",
       "headings": [
         "About Copilot auto model selection",
-        "About Copilot automations",
-        "About Copilot integrations",
-        "About agent apps",
-        "About agent management",
-        "About agent skills",
+        "About GitHub Copilot",
+        "About GitHub Copilot Memory",
+        "About GitHub Copilot agents",
         "About cloud and local sandboxes for GitHub Copilot",
         "About computer use in GitHub Copilot",
-        "About custom agents",
+        "About default availability of Copilot features and models",
+        "About enterprise accounts for Copilot Business",
+        "About enterprise-managed plugin standards",
         "Articles",
         "GitHub Copilot",
         "GitHub Copilot documentation",
@@ -474,7 +479,7 @@
       ],
       "markers": {
         "AGENTS.md": false,
-        "CLI hooks": false,
+        "CLI hooks": true,
         "Copilot Chat": true,
         "Copilot Workspace": false,
         "Copilot cloud agent": true,
@@ -491,7 +496,7 @@
       }
     },
     "google-antigravity": {
-      "docs_hash": "9fe532d247c3e361",
+      "docs_hash": "864e06167cc84912",
       "headings": [],
       "markers": {
         "AGENTS.md": false,
@@ -501,6 +506,7 @@
         "PostToolUse": false,
         "PreInvocation": false,
         "PreToolUse": false,
+        "SessionStart": false,
         "Stop": false,
         "agent manager": false,
         "agent permissions": false,
@@ -518,7 +524,7 @@
       }
     },
     "opencode": {
-      "docs_hash": "df5b372cd3b7cdc6",
+      "docs_hash": "9bbfddf2a2042cba",
       "headings": [
         "Add features",
         "Ask questions",
@@ -529,7 +535,6 @@
         "Intro",
         "Make changes",
         "On this page",
-        "Share",
         "Undo changes",
         "Usage"
       ],
@@ -580,7 +585,7 @@
       }
     },
     "windsurf": {
-      "docs_hash": "503b0fbf7e5a2e16",
+      "docs_hash": "e360c5630adeae71",
       "headings": [
         "Accounts",
         "Agent Command Center",
@@ -595,7 +600,7 @@
         "AGENTS.md": true,
         "Cascade": true,
         "MCP": true,
-        "SKILL.md": true,
+        "SKILL.md": false,
         "always_on": false,
         "glob": true,
         "hooks": true,

@@ -30,6 +30,13 @@ INPUT=$(cat 2>/dev/null || true)
 FLAG="$HOME/.softspark/ai-toolkit/state/search-required-$(hook_session_id).flag"
 [ -f "$FLAG" ] || exit 0
 
+# A Stop continuation is already a recovery pass, not a new user question.
+# Respect both clients' loop guard even if a stale flag survived the first pass.
+if [ "$(hook_json '.stop_hook_active // false')" = "true" ]; then
+    rm -f "$FLAG" 2>/dev/null
+    exit 0
+fi
+
 if ! ai_toolkit_has_search_provider; then
     rm -f "$FLAG" 2>/dev/null
     exit 0

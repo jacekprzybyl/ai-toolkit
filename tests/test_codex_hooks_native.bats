@@ -25,6 +25,34 @@ print(format(stat.S_IMODE(Path(sys.argv[1]).stat().st_mode), "o"))
 PY
 }
 
+@test "codex-hooks-native: SubagentStop returns supported JSON" {
+    python3 "$TOOLKIT_DIR/scripts/generate_codex_hooks.py" "$TEST_ROOT" >/dev/null
+    git init -q "$TEST_ROOT"
+    run python3 - "$TEST_ROOT" <<'PY'
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+project = Path(sys.argv[1])
+hook = json.loads((project / ".codex/hooks.json").read_text())["hooks"]["SubagentStop"][0]["hooks"][0]
+result = subprocess.run(hook["command"], shell=True, cwd=project,
+                        input=json.dumps({"agent_type": "reviewer"}),
+                        env={**os.environ, "TOOLKIT_HOOK_PROFILE": "standard"},
+                        text=True, capture_output=True, check=True)
+output = json.loads(result.stdout)
+assert "reviewer" in output["systemMessage"], output
+assert "decision" not in output, output
+PY
+    [ "$status" -eq 0 ]
+}
+
+@test "codex-hooks-native: duplicate layers execute identical advisory hooks once per invocation" {
+    run python3 "$TOOLKIT_DIR/tests/fixtures/codex_hook_dedup_cases.py" "$TEST_ROOT" "$TOOLKIT_DIR"
+    [ "$status" -eq 0 ]
+}
+
 @test "codex-hooks-native: project hooks are self-contained and schema-valid" {
     run python3 "$TOOLKIT_DIR/scripts/generate_codex_hooks.py" "$TEST_ROOT"
     [ "$status" -eq 0 ]

@@ -3,9 +3,9 @@ title: "AI Toolkit - Architecture Overview"
 category: reference
 service: ai-toolkit
 tags: [architecture, overview, design, structure]
-version: "1.14.1"
+version: "1.14.2"
 created: "2026-03-23"
-last_updated: "2026-10-10"
+last_updated: "2026-10-27"
 description: "Architecture of ai-toolkit: install ownership, runtime adapters, skill tiers, and project integration."
 ---
 
@@ -22,6 +22,13 @@ Shared, project-agnostic AI development toolkit for Claude Code, Claude Chat/Cow
 3. **Composable** — agents reference skills; skills invoke agents; hooks validate all work
 4. **Multi-language** — hooks and skills support Python, TypeScript, PHP, Dart, Go
 5. **Cost-optimized** — simpler agents run on `sonnet`, complex reasoning on `opus`
+
+Delegated task readiness is distinct from a live process. Claude teammates
+start at the trusted repository root, expose startup consent through their
+panel/pane, and use native shutdown after reporting. The diagnostic procedure
+is [Claude teammate startup](../troubleshooting/claude-teammate-startup.md).
+MCP refresh preserves omitted local Codex tool policies only for an unchanged
+connection; a different transport or authentication context does not inherit trust.
 
 ## Directory Structure
 
@@ -309,7 +316,7 @@ Agents (code-reviewer, debugger, devops-implementer, ...)
 
 ## Quality Hooks
 
-28 entries across 14 lifecycle events. See [hooks-catalog.md](hooks-catalog.md) for full details.
+29 entries across 14 lifecycle events. See [hooks-catalog.md](hooks-catalog.md) for full details.
 
 | Hook | Trigger | Script | Action |
 |------|---------|--------|--------|

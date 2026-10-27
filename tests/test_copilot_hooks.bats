@@ -75,9 +75,21 @@ PY
 @test "copilot-hooks: preserves unrelated user files and is deterministic" {
     hooks="$TEST_ROOT/project/.github/hooks"
     mkdir -p "$hooks/user-assets"
-    printf '%s\n' '{"version":1,"hooks":{"sessionEnd":[{"bash":"echo user"}]}}' \
+    printf '%s\n' '{"version":1,"hooks":{"sessionEnd":[{"bash":"echo user"}],"userPromptTransformed":[{"command":"echo {}"}]}}' \
         > "$hooks/user.json"
     printf '%s\n' 'user asset' > "$hooks/user-assets/custom.txt"
+
+    run python3 - "$TOOLKIT_DIR" "$hooks/user.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(sys.argv[1]) / "scripts"))
+from generate_copilot_hooks import _validate_document
+
+_validate_document(json.loads(Path(sys.argv[2]).read_text()))
+PY
+    [ "$status" -eq 0 ]
 
     python3 "$TOOLKIT_DIR/scripts/generate_copilot_hooks.py" "$TEST_ROOT/project" >/dev/null
     shasum "$hooks/user.json" "$hooks/user-assets/custom.txt" > "$TEST_ROOT/user.before"

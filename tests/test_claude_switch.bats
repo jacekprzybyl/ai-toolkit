@@ -94,3 +94,9 @@ teardown() {
     run node "$TOOLKIT_DIR/bin/ai-toolkit.js" claude-switch run
     [ "$status" -eq 143 ]
 }
+
+@test "account switches: parent shutdown reaches the client without orphaning it" {
+    run python3 "$TOOLKIT_DIR/tests/fixtures/account_switch_signal_cases.py"
+    printf '%s\n' "$output"
+    [ "$status" -eq 0 ]
+}

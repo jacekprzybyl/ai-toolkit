@@ -36,7 +36,7 @@ RULES = (
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 BLOCK_START = re.compile(
     r"^\s*<(?P<tag>task-notification|ci-monitor-event|system-reminder|"
-    r"local-command-[\w-]+|command-name|command-message)(?:\s[^>]*|)>",
+    r"hook_prompt|local-command-[\w-]+|command-name|command-message)(?:\s[^>]*|)>",
     re.IGNORECASE,
 )
 PASTED = re.compile(
@@ -50,6 +50,26 @@ QUOTED = re.compile(
     r"‘[^’\n]*’|(?<!\w)'[^'\n]*'(?!\w)"
 )
 OPAQUE = re.compile(r"https?://\S+|(?:^|\s)(?:[/~][^\s]+)|\b[\w+=/-]{32,}\b")
+CONVERSATIONAL = re.compile(
+    r"(?:"
+    r"jak (?:zrobisz|skonczysz|skończysz|zakonczysz|zakończysz) [^.?!\n]+ "
+    r"(?:jeszcze jedna|kolejna|następna|nastepna) (?:rzecz|sprawa|zadanie)"
+    r"(?: do (?:sprawdzenia|zrobienia))?(?: (?:będzie|bedzie))?|"
+    r"(?:once|when) you (?:finish|are done)[,. ]+(?:i have|there is|there's) "
+    r"(?:another|one more) (?:thing|task)(?: for you)?(?: to (?:check|do))?|"
+    r"tak[, ]+(?:masz|daję|daje) (?:zgodę|zgode)(?: na (?:merge|scalenie)(?: z --admin)?)?|"
+    r"(?:yes[, ]+)?(?:you have my approval|approved)(?: to merge(?: with --admin)?)?"
+    r")[.! ]*", re.IGNORECASE,
+)
+
+
+def requires_search(prompt: str) -> bool:
+    """Exclude filler-only handoffs and our continuation, not embedded tasks."""
+    normalized = unicodedata.normalize("NFKC", prompt).strip()
+    if normalized.startswith("Step 0 violated: you responded to a technical prompt"):
+        return False
+    intent = strip_blocks(normalized).strip()
+    return bool(intent) and CONVERSATIONAL.fullmatch(intent) is None
 
 
 def strip_blocks(prompt: str) -> str:
@@ -105,4 +125,8 @@ def classify(prompt: str) -> str:
 
 
 if __name__ == "__main__":
-    print(classify(sys.stdin.read()))
+    prompt = sys.stdin.read()
+    if sys.argv[1:] == ["--search-required"]:
+        print("yes" if requires_search(prompt) else "no")
+    else:
+        print(classify(prompt))

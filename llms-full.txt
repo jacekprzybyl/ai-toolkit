@@ -41,6 +41,7 @@
 - [Ecosystem sync, 2026-09-23](kb/planning/ecosystem-sync-20260923.md)
 - [Ecosystem review for 5.1.0](kb/planning/ecosystem-sync-20261002.md)
 - [Ecosystem review for 5.2.0](kb/planning/ecosystem-sync-20261005.md)
+- [Ecosystem sync and Claude teammate diagnostics](kb/planning/ecosystem-sync-20261027.md)
 - [Editor support and delegation refresh](kb/planning/editor-and-delegation-refresh-20261001.md)
 - [Model compatibility refresh](kb/planning/model-compatibility-refresh-20260923.md)
 - [SOP: Ecosystem Sync](kb/procedures/sop-ecosystem-sync.md)
@@ -89,6 +90,7 @@
 - [Unique Features & Differentiators](kb/reference/unique-features.md)
 - [Windows Support](kb/reference/windows-support.md)
 - [Troubleshooting](kb/troubleshooting/README.md)
+- [Claude Teammates Wait at Startup or Remain Idle](kb/troubleshooting/claude-teammate-startup.md)
 - [Claude App Plugin Loads Twice in Claude Code](kb/troubleshooting/plugin-double-load.md)
 
 ## Skills
@@ -8333,6 +8335,141 @@ helper through the installed hook.
 
 ---
 
+## kb/planning/ecosystem-sync-20261027.md
+
+---
+title: "Ecosystem sync and Claude teammate diagnostics"
+category: planning
+service: ai-toolkit
+tags: [ecosystem, compatibility, claude, codex, subagents]
+created: "2026-10-27"
+last_updated: "2026-10-27"
+description: "Execution plan and evidence for the October ecosystem refresh and reported hanging Claude teammates."
+---
+
+# Ecosystem sync and Claude teammate diagnostics
+
+## Objective and authorization
+
+The user requested a compatibility review of Codex, Claude and all other
+supported editors, updates following the SOP, and investigation of hanging
+Claude teammates. Implementation and installed-toolkit refresh are authorized.
+Preserve configured models, permissions, user files and active sessions.
+
+## Execution plan
+
+1. Capture installed versions, effective configuration, live process evidence
+   and the online ecosystem report before modifying runtime configuration.
+2. Review all 13 registry targets against current official feature references;
+   classify each finding using `kb/procedures/sop-ecosystem-sync.md`.
+3. Reproduce confirmed integration defects, add regression coverage, and update
+   their canonical sources, adapters, generated artifacts and affected docs.
+4. Run validation, audit, lint/type checks and full test suites. Refresh the
+   ecosystem snapshot only after the corresponding sources are reviewed.
+5. Refresh the installed toolkit and installed plugin packs using the maintenance
+   SOP, verify delivered files and configuration preservation, and record remaining
+   limitations. Prepare any release through the release SOP, never manual tagging.
+
+## Ownership
+
+- Coordinator: execution plan, online doctor, registry and snapshot integration,
+  shared documentation, verification and installed-toolkit refresh.
+- Claude diagnostics reviewer: live teammate/process evidence and native Claude
+  lifecycle contracts; initially read-only.
+- Codex reviewer: native agent/skill/hook/plugin contracts and duplicate or false
+  search-first hook behavior; initially read-only.
+- Other-editor reviewer: the remaining eleven registry targets, official sources
+  and drift classifications; initially read-only.
+
+## Acceptance criteria
+
+- Every registry target has a dated evidence-based disposition, including source
+  access gaps; installed versions are distinguished from vendor release versions.
+- Every confirmed changed behavior has appropriate regression tests and docs.
+- Teammate diagnosis identifies a supported cause with evidence, or states exactly
+  which live evidence is missing; an idle process is not called hung without proof.
+- Full applicable local gates pass on the final source revision.
+- Installed output preserves user configuration, including the explicit global
+  `rag-mcp` automatic approval preference.
+
+## Pre-mortem
+
+- Documentation landing-page changes can mask feature-contract drift: review
+  priority feature references as well as automated heading/marker differences.
+- Restarting or killing an active teammate can lose useful execution state:
+  collect process and session evidence before any disruptive action.
+- Concurrent generation can overwrite independent changes: centralize shared
+  registry, snapshot and artifact regeneration in the coordinator.
+- Global/local hooks can run twice or block on conversational messages: inspect
+  actual emitted hooks and event payloads, then reproduce before patching.
+- Local test tooling can create false failures: use the verified Node/npm path;
+  the preceding merge passed with npm 11.13.0, 2003 Bats tests and 1026 Python tests.
+
+## Initial evidence
+
+- Starting revision: `678cbeff7a6a16e50147b612a4e428fcce494160` (clean `main`).
+- Installed versions: ai-toolkit 5.4.1, Claude Code 2.1.311, Codex CLI 0.164.0.
+- Installed profile: standard; all eleven editor integrations registered globally.
+- Installed plugin state: `legal-pl-pack` 1.3.0 for Claude; no Codex, Cursor or
+  Gemini plugin packs recorded.
+- The registry's last documentation review predates this task (2026-10-05).
+- All 13 targets now have dated official-source dispositions in
+  `scripts/ecosystem_tools.json` and `kb/reference/supported-tools-registry.md`.
+- The online doctor refresh completed without fetch errors. A subsequent online
+  check passed; four pages changed content hashes only, with no structural drift.
+
+## Confirmed defects and implementation
+
+- Claude teammates launched below the repository root waited at the external
+  instruction-import consent dialog before consuming their task messages.
+  Readiness/root-directory guidance and native shutdown instructions are fixed;
+  exact legacy idle reminders migrate without changing user hook variants.
+- Parent-directed SIGHUP/SIGTERM left account clients running after the Node
+  wrapper exited. Isolated fake Claude/Codex clients reproduce this; supervision
+  now forwards shutdown and preserves single terminal SIGINT delivery.
+- Codex search guards re-armed on conversational handoffs/continuations and
+  ignored `stop_hook_active`; SubagentStop emitted invalid plain output. Native
+  regressions cover fixes and safe pairing of equivalent global/local advisory
+  invocations, with bounded state cleanup and normal execution on uncertainty.
+- Codex MCP refresh discarded user policies and empty allowlists. Seven
+  integration cases cover preservation for unchanged connections, explicit
+  replacement, empty transport options and no trust transfer to changed servers.
+- Antigravity retirement guidance was stale; current guidance uses October 19
+  while retaining older-client fallback. Copilot event metadata and model
+  reference guidance are refreshed without changing selected models.
+- Full macOS gates exposed a 1 MiB Node output-buffer failure once the expanded
+  catalogue exceeded that size. A bounded 16 MiB generator buffer and explicit
+  overflow diagnostics now pass small/large/overflow CLI regressions.
+
+## Verification and remaining operational work
+
+Independent reviews approved MCP policy preservation and the corrected Codex
+hooks. Focused suites passed, including 243 Codex/search Bats tests, 18 prompt
+Python tests, seven MCP policy tests, and account signal/idle migration cases.
+The first complete macOS run passed 2009 of 2011 tests and identified the two
+CLI export failures above. After that fix, every `release --gates-only` gate
+passed: 2012 Bats tests on macOS, 2012 on Ubuntu, 1035 Python tests on Python
+3.11, Ruff, mypy, Python 3.13 syntax/import checks, validation, audit, ShellCheck,
+generation drift, package build and isolated install smoke. Initial logs remain
+retained. No tag or publication was performed by the rehearsal.
+
+The verified 5.4.2 package is installed locally, the existing legal pack was
+updated from 1.3.0 to 1.7.0, and the updater refreshed 99 registered projects.
+Package/configuration backups were verified before installation. Model and
+permission settings, the global RAG approval, and constitution bytes were
+preserved. Global/project Codex assets match byte-for-byte; each Claude profile
+has one current idle reminder. Doctor reports no errors.
+
+An enabled older synced toolkit plugin was confirmed with the native Claude
+plugin list and disabled through its supported command, leaving the global
+install authoritative. The new Claude Chat/Cowork ZIP and global instructions
+passed native runtime validation; uploading that bundle requires the user's
+Claude application UI. Live-process cleanup still requires an explicit selection
+because an additional idle session has an open terminal. No existing session or
+external-import consent flag has been changed.
+
+---
+
 ## kb/planning/editor-and-delegation-refresh-20261001.md
 
 ---
@@ -11515,9 +11652,9 @@ title: "AI Toolkit - Architecture Overview"
 category: reference
 service: ai-toolkit
 tags: [architecture, overview, design, structure]
-version: "1.14.1"
+version: "1.14.2"
 created: "2026-03-23"
-last_updated: "2026-10-10"
+last_updated: "2026-10-27"
 description: "Architecture of ai-toolkit: install ownership, runtime adapters, skill tiers, and project integration."
 ---
 
@@ -11534,6 +11671,13 @@ Shared, project-agnostic AI development toolkit for Claude Code, Claude Chat/Cow
 3. **Composable** — agents reference skills; skills invoke agents; hooks validate all work
 4. **Multi-language** — hooks and skills support Python, TypeScript, PHP, Dart, Go
 5. **Cost-optimized** — simpler agents run on `sonnet`, complex reasoning on `opus`
+
+Delegated task readiness is distinct from a live process. Claude teammates
+start at the trusted repository root, expose startup consent through their
+panel/pane, and use native shutdown after reporting. The diagnostic procedure
+is [Claude teammate startup](../troubleshooting/claude-teammate-startup.md).
+MCP refresh preserves omitted local Codex tool policies only for an unchanged
+connection; a different transport or authentication context does not inherit trust.
 
 ## Directory Structure
 
@@ -11821,7 +11965,7 @@ Agents (code-reviewer, debugger, devops-implementer, ...)
 
 ## Quality Hooks
 
-28 entries across 14 lifecycle events. See [hooks-catalog.md](hooks-catalog.md) for full details.
+29 entries across 14 lifecycle events. See [hooks-catalog.md](hooks-catalog.md) for full details.
 
 | Hook | Trigger | Script | Action |
 |------|---------|--------|--------|
@@ -12577,7 +12721,7 @@ service: ai-toolkit
 tags: [codex, compatibility, install, skills, hooks]
 version: "1.3.0"
 created: "2026-04-12"
-last_updated: "2026-10-08"
+last_updated: "2026-10-27"
 description: "Reference for how ai-toolkit maps Claude-oriented skills, hooks, and plugin packs to Codex CLI."
 ---
 
@@ -12845,7 +12989,18 @@ without regex validation because Codex ignores them.
 
 The Stop search adapter returns `decision: "block"` with `reason` to request a
 continuation. It must not return `continue: false`, which stops the turn. The
-search reminder remains one-shot.
+search reminder remains one-shot and respects `stop_hook_active`. Hook-generated
+continuation prompts and recognized conversational handoffs do not arm a new
+search requirement. `SubagentStop` emits native JSON `systemMessage` output,
+not plain text or a continuation request.
+
+Codex loads global and project hook layers additively. Equivalent toolkit
+advisory/state handlers pair duplicate invocations across those layers using
+the session, turn, event, full payload and runtime content digest. Subagent/tool
+events additionally require their native agent/tool-call identity. Same-layer
+repeats and different runtime versions still execute. Missing identity leaves
+both handlers active; this does not deduplicate `SessionStart` or permission
+guards, and it never suppresses unrelated user hooks.
 
 The generator merges these Codex-compatible events into project or user
 `hooks.json`, preserving unrelated user handlers and replacing only commands
@@ -12907,6 +13062,11 @@ hook helper. Set `AI_TOOLKIT_HOOK_VERBOSE=1` only when debugging hook output
 outside the Codex UI.
 
 ## MCP Configuration
+
+Refreshing the same MCP connection preserves omitted local enable/disable,
+allowlist/denylist and approval policy fields. Explicit template fields replace
+them; changed transport/authentication context does not inherit prior trust.
+See [MCP templates](mcp-templates.md) for the refresh contract.
 
 Codex MCP servers are supported at both documented scopes:
 
@@ -15195,9 +15355,9 @@ category: reference
 section: reference
 service: ai-toolkit
 tags: [hooks, quality, safety, enforcement, settings.json]
-version: "1.18.0"
+version: "1.19.0"
 created: "2026-03-27"
-last_updated: "2026-10-08"
+last_updated: "2026-10-27"
 description: "Complete reference of all ai-toolkit hooks: events, scripts, installation, and runtime behavior."
 ---
 
@@ -15393,6 +15553,10 @@ Codex-generated hooks intentionally run this script without
 `AI_TOOLKIT_HOOK_FORMAT=json` by default because Codex renders
 `additionalContext` visibly in the TUI; the search-first flag side effect still
 arms the corrective Stop hook.
+
+Recognized conversational handoffs and hook-generated continuation text do not
+arm search-first enforcement. The Stop guard honors `stop_hook_active`, preventing
+a recovery prompt from repeatedly restarting the turn.
 
 ### UserPromptSubmit (usage tracking) — `track-usage.sh`
 
@@ -15934,6 +16098,10 @@ marked toolkit files while preserving user-owned hooks.
 
 ### Google Antigravity hooks (`.agents/hooks.json`)
 
+The current native contract has six events, including `SessionStart`. The
+toolkit intentionally wires the three handlers below; it does not claim that
+every documented event needs a toolkit handler.
+
 The toolkit owns only the top-level `ai-toolkit` namespace and preserves
 unrelated namespaces. It registers only the events whose adapter output does
 something: `PreToolUse` with the matcher `run_command`, `PreInvocation`, and
@@ -15998,6 +16166,13 @@ Copilot hooks follow GitHub's native [hooks reference](https://docs.github.com/e
 - **Ownership:** generated configs carry `AI_TOOLKIT_HOOK_OWNER=ai-toolkit`; unrelated hook files are not edited.
 
 ### Codex CLI hooks (`.codex/hooks.json`)
+
+The generated `SubagentStop` handler emits native JSON with an advisory
+`systemMessage`. Equivalent toolkit advisory/state handlers can deduplicate
+one invocation across global and project layers when native session/turn and
+agent/tool-call identity is available. Distinct versions, same-layer repeated
+calls, missing identity, permission guards and user hooks continue to run.
+`SessionStart` is not deduplicated without a reliable turn identity.
 
 Codex hooks follow the native [Codex hooks contract](https://learn.chatgpt.com/docs/hooks):
 
@@ -16895,9 +17070,9 @@ title: "MCP Server Templates"
 category: reference
 service: ai-toolkit
 tags: [mcp, templates, servers, configuration, editors, inject-mcp, external-templates]
-version: "1.7.0"
+version: "1.8.0"
 created: "2026-04-07"
-last_updated: "2026-09-10"
+last_updated: "2026-10-27"
 description: "Reference for 28 built-in MCP server templates, external template injection via inject-mcp, and native editor MCP installation support."
 ---
 
@@ -16950,12 +17125,20 @@ When `install` runs with `--scope project`, ai-toolkit also updates the project'
 | `windsurf` | global | `~/.codeium/windsurf/mcp_config.json` | Global-only official config |
 | `cline` | global | `~/.cline/data/settings/cline_mcp_settings.json` | Global-only official config |
 | `augment` | global | `~/.augment/settings.json` | Global-only settings file |
-| `codex` | project + global | `.codex/config.toml`, `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`) | Validated TOML `mcp_servers` tables in a marker-bounded managed block; unrelated TOML/comments preserved |
+| `codex` | project + global | `.codex/config.toml`, `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`) | Validated TOML `mcp_servers` tables in a marker-bounded managed block; unrelated TOML/comments and omitted local tool policies for unchanged connections preserved |
 
 Project-local `ai-toolkit install --local` also mirrors `.mcp.json` into Claude
 project settings plus selected project editors that have official
 repository/workspace MCP files (`cursor`, `copilot`, `antigravity`, `roo`, `codex`). Codex
 loads `.codex/config.toml` only for trusted project layers.
+
+Refreshing an unchanged Codex MCP connection retains locally configured
+`enabled`, `enabled_tools`, `disabled_tools`, `default_tools_approval_mode`, and
+per-tool `tools` policies when the incoming template omits them. Explicit
+template policies replace those fields, including an empty allowlist. A changed
+transport, endpoint, credentials, environment, working directory or OAuth scopes
+does not inherit the previous connection's approval. This keeps a local trust
+decision from being transferred to a different server.
 
 ## Template List
 
@@ -17678,15 +17861,15 @@ title: "Model compatibility for skills and agents"
 category: reference
 service: ai-toolkit
 tags: [models, skills, agents, codex, copilot, claude, effort]
-version: "1.2.0"
+version: "1.3.0"
 created: "2026-09-23"
-last_updated: "2026-10-08"
+last_updated: "2026-10-27"
 description: "Dated model snapshot and rules separating runtime selection, API parameters and prompt guidance."
 ---
 
 # Model compatibility for skills and agents
 
-Reviewed 2026-10-08. These are documentation snapshots, not a guarantee that a
+Reviewed 2026-10-27. These are documentation snapshots, not a guarantee that a
 model is enabled on a particular account. Check the active client's picker and
 policy before selecting a model. Preserve a user's explicit choice; do not
 replace a tiered workflow with a single flagship model.
@@ -17711,8 +17894,8 @@ requires 2.1.293 or later. See
 
 | Provider/surface | Current examples at review time | Important boundary |
 |------------------|---------------------------------|--------------------|
-| OpenAI API | `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna` (`gpt-6-sol` still listed) | Use Responses for reasoning with tools; Astra and Sol 6.1 reject `none` (Sol 6.1 also `minimal`; use `low`), while GPT-6 Sol/Luna allow it |
-| Codex | `gpt-6.1-sol` recommended for complex coding, `gpt-6-astra` most capable, `gpt-6-luna` for focused tasks, according to account/client availability | Start from the selected/default effort; higher reasoning and orchestration modes are explicit choices |
+| OpenAI API | `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-luna` (`gpt-6-sol` still listed) | Use Responses for reasoning with tools; Astra and Sol 6.1 reject `none` (Sol 6.1 also `minimal`; use `low`), while Terra 6.1 and GPT-6 Sol/Luna allow `none` |
+| Codex | `gpt-6.1-sol` for repeated complex work, `gpt-6-astra` most capable, `gpt-6.1-terra` for writing and visual/computer work, `gpt-6-luna` for focused tasks, according to account/client availability | Start from the selected/default effort; higher reasoning and orchestration modes are explicit choices |
 | Claude API | `claude-opus-5-5`, `claude-fable-5-1`, `claude-sonnet-5-5`, `claude-haiku-5-5` | Opus 5.5 and Haiku 5.5 default to medium effort, Fable/Sonnet to high; all four support `low` to `max` |
 | GitHub Copilot | Offers models from multiple providers, including current GPT-6 and Claude families | Plan, organization policy and client determine the actual list; utility models are not selectable session models |
 
@@ -17723,7 +17906,7 @@ Sources: [OpenAI latest model guide](https://developers.openai.com/api/docs/guid
 [Copilot availability](https://docs.github.com/en/copilot/reference/ai-models/supported-models).
 
 Retirement is also surface-specific. At this review date, Codex with ChatGPT
-sign-in has retired GPT-5.4/mini and announces GPT-5.5 retirement for 2026-10-14.
+sign-in has retired GPT-5.4/mini and GPT-5.5 (2026-10-14).
 That notice does not retire those models from the OpenAI API or establish
 Copilot availability. Check the relevant account/client instead of applying
 one product's retirement list globally. See the Codex models reference above.
@@ -18675,7 +18858,7 @@ service: ai-toolkit
 tags: [skills, domain-knowledge, catalog, task-skills, hybrid-skills]
 version: "1.7.0"
 created: "2026-03-23"
-last_updated: "2026-09-23"
+last_updated: "2026-10-27"
 description: "Complete skills catalog with task, hybrid, and knowledge skills. Includes Codex adaptation notes, effort levels, skill-scoped hooks, executable scripts, security auditor, and persona presets."
 ---
 
@@ -18685,6 +18868,9 @@ Model-specific guidance and client/API boundaries are recorded in
 [Model Compatibility](model-compatibility.md). Claude skill `model` and `effort`
 fields do not automatically configure Codex or Copilot. Preserve the active
 selection and verify available capabilities before applying an override.
+The October 27 review includes GPT-6.1 Terra and the completed GPT-5.5
+retirement for ChatGPT-authenticated Codex sessions; it changes reference
+guidance, not the active client's model or permissions.
 
 All functionality is unified under skills. Task and hybrid skills are user-invocable as slash commands. Knowledge skills provide domain patterns auto-loaded by agents.
 
@@ -19142,9 +19328,9 @@ title: "Supported Tools Registry"
 category: reference
 service: ai-toolkit
 tags: [editors, platforms, generators, integration, ecosystem]
-version: "1.19.1"
+version: "1.21.0"
 created: "2026-04-23"
-last_updated: "2026-10-10"
+last_updated: "2026-10-27"
 description: "Human-readable view of scripts/ecosystem_tools.json: Claude Code, Claude Chat/Cowork, and 11 editors."
 ---
 
@@ -19174,6 +19360,7 @@ For current model defaults and optional Claude-to-Codex execution, see
 | Field | Value |
 |-------|-------|
 | ID | `claude-code` |
+| Review 2026-10-27 | Classes A/B. Stable and locally installed 2.1.311. Native [team lifecycle](https://code.claude.com/docs/en/agent-teams) and [external import consent](https://code.claude.com/docs/en/memory#import-additional-files) informed readiness, shutdown and legacy idle-reminder corrections. Other emitted contracts remain compatible. |
 | Docs | https://code.claude.com/docs (platform.claude.com/docs 307-redirects here) |
 | Release notes | https://github.com/anthropics/claude-code/releases |
 | Changelog | https://code.claude.com/docs/en/changelog; GitHub release feed is authoritative when the generated page lags (local version observed 2026-09-23: 2.1.280; documentation contracts were reviewed independently of the local version) |
@@ -19195,6 +19382,7 @@ For current model defaults and optional Claude-to-Codex execution, see
 | Field | Value |
 |-------|-------|
 | ID | `claude-app` |
+| Review 2026-10-27 | Classes A/C. [Plugin distribution](https://support.claude.com/en/articles/13837440-use-plugins-in-claude) retains the exported ZIP and runtime split. Account sync is separate from local installation; inspect duplicate components before disabling either copy. |
 | Docs | https://support.claude.com/en/articles/13345190-get-started-with-claude-cowork |
 | Plugin docs | https://support.claude.com/en/articles/13837440-use-plugins-in-claude |
 | Config surfaces | `Settings > Cowork > Global instructions`, Cowork folder instructions, `Customize > Skills`, `Customize > Plugins`, plus the one file-based surface: `claude_desktop_config.json` (macOS `~/Library/Application Support/Claude/`, Windows `%APPDATA%/Claude/`, Linux `~/.config/Claude/`; `CLAUDE_USER_DATA_DIR` overrides the root) |
@@ -19213,6 +19401,7 @@ For current model defaults and optional Claude-to-Codex execution, see
 | Field | Value |
 |-------|-------|
 | ID | `cursor` |
+| Review 2026-10-27 | Classes A/C. [Hooks](https://cursor.com/docs/hooks) retain the generated version-1 events. [Subagents](https://cursor.com/docs/subagents) retain the emitted metadata and `model: inherit`; optional per-model parameters do not authorize changing user selections. |
 | Docs | https://cursor.com/docs |
 | Changelog | https://cursor.com/changelog |
 | Stable docs mirror | https://cursor.com/llms.txt (all doc pages have .md twins) |
@@ -19228,6 +19417,7 @@ For current model defaults and optional Claude-to-Codex execution, see
 | Field | Value |
 |-------|-------|
 | ID | `windsurf` |
+| Review 2026-10-27 | Class A. [Lifecycle hooks](https://docs.devin.ai/cli/extensibility/hooks/lifecycle-hooks) retain the emitted event mappings. [Skill discovery](https://docs.devin.ai/cli/extensibility/skills/overview) still supports `.windsurf/skills/`; retain one pointer instead of duplicating it in `.devin/skills/`. |
 | Docs | https://docs.devin.ai/desktop (Windsurf rebranded to Devin Desktop ~2026-06-02; docs.windsurf.com resolves here) |
 | Changelog | https://docs.devin.ai/desktop/changelog (windsurf.com/changelog 308-permanent-redirects here) |
 | Stable docs mirror | https://docs.devin.ai/desktop/... per-page .md twins; legacy `.windsurf/`, `.windsurfrules`, `~/.codeium/windsurf/` rule paths still read as fallback (new canonical rules/hooks tree: `.devin/`) |
@@ -19238,13 +19428,14 @@ For current model defaults and optional Claude-to-Codex execution, see
 | Tracked capabilities | Cascade, `windsurfrules`, `AGENTS.md`, activation triggers (`always_on`/`glob`/`model_decision`), workflows, skills, MCP, memories, hooks |
 | Activation modes emitted | always_on (agents/security/quality), glob (testing + language rules), model_decision (code-style/workflow) |
 | Hooks migration | **Complete.** Cascade and `.windsurf/hooks.json` ended on 2026-07-01. `generate_devin_hooks.py` is now the only Windsurf-family hook generator and emits `.devin/hooks.v1.json` with Claude-style events, Devin tool-name matchers, and the flat Devin block contract. |
-| Latest upstream | Devin Desktop v3.10.31 (2026-09-16). Workflows have been deprecated in favor of skills since v3.6.22; generation reports this while retaining compatibility files. v3.4.22 made skill `permissions:` frontmatter affect auto-approvals; ai-toolkit does not emit permissions because its pointer skill executes no privileged workflow. |
+| Earlier reviewed release | Devin Desktop v3.10.31 (2026-09-16), a historical baseline rather than a latest-version claim. Workflows have been deprecated in favor of skills since v3.6.22; generation reports this while retaining compatibility files. v3.4.22 made skill `permissions:` frontmatter affect auto-approvals; ai-toolkit does not emit permissions because its pointer skill executes no privileged workflow. |
 
 ### GitHub Copilot
 
 | Field | Value |
 |-------|-------|
 | ID | `github-copilot` |
+| Review 2026-10-27 | Classes A/C/D. [The hook reference](https://docs.github.com/en/copilot/reference/hooks-reference) retains generated command handlers and documents `userPromptTransformed`, now recognized without adding a toolkit handler. Direct `exec`/`args`, agent-scoped hooks, HTTP/prompt handlers and progress messages are optional surfaces. The dedicated toolkit file does not validate sibling user hook files. [Retired `infer`](https://docs.github.com/en/copilot/reference/custom-agents-configuration) is already replaced by invocation controls. |
 | Docs | https://docs.github.com/en/copilot |
 | Release notes | https://github.blog/changelog/label/copilot/ |
 | Native docs | [VS Code hooks](https://code.visualstudio.com/docs/agent-customization/hooks), [VS Code skills](https://code.visualstudio.com/docs/agent-customization/agent-skills), [Hooks reference](https://docs.github.com/en/copilot/reference/hooks-reference), [skills](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills), [CLI config directory](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference) |
@@ -19260,6 +19451,7 @@ For current model defaults and optional Claude-to-Codex execution, see
 | Field | Value |
 |-------|-------|
 | ID | `gemini-cli` |
+| Review 2026-10-27 | Class A. Stable [0.65.0](https://github.com/google-gemini/gemini-cli/releases/tag/v0.65.0), published 2026-10-20, fixes runtime/authentication/resume behavior without requiring generator changes. The [eleven hook events](https://geminicli.com/docs/hooks/) still match the allowlist; completion remains `AfterAgent`. Release review is separate from the local version probe. |
 | Docs | https://github.com/google-gemini/gemini-cli/tree/main/docs |
 | Release notes | https://github.com/google-gemini/gemini-cli/releases |
 | Config paths | `GEMINI.md`, `.gemini/settings.json`, `~/.gemini/settings.json`, `.gemini/commands/*.toml`, `.gemini/skills/*/SKILL.md`, `.gemini/agents/*.md`, `.agents/skills/*/SKILL.md`, `~/.gemini/skills/*/SKILL.md`, `~/.gemini/agents/*.md`, `~/.agents/skills/*/SKILL.md` (the `.agents/skills` alias wins over `.gemini/skills` within the same tier). Extension packages keep `gemini-extension.json` at the package root and install below `~/.gemini/extensions/<name>/`. |
@@ -19268,13 +19460,14 @@ For current model defaults and optional Claude-to-Codex execution, see
 | Tracked capabilities | `GEMINI.md`, `mcpServers`, tools, `settings.json`, `BeforeTool`, `AfterTool`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeModel`, `AfterModel`, `Notification`, `PreCompress`, `SessionStart`, `SessionEnd`, `SKILL.md`, `activate_skill`, custom commands, `.gemini/agents/*.md` subagents, `gemini-extension.json` (no native `Stop` event — generator maps Stop-equivalent to `AfterAgent`; 11 documented hook events total) |
 | Version probe | `gemini --version` |
 | Extension coverage | Current Gemini extensions can bundle root `GEMINI.md`, `commands/`, `hooks/hooks.json`, `skills/`, `agents/`, and `policies/`. ai-toolkit does not export a Gemini extension package; this distribution surface is class C / not adopted. |
-| Latest upstream | v0.49.0 (2026-06-25; the stable line skipped v0.48.0 — its preview content was promoted into v0.49.0). NOTE: Gemini CLI dropped free/paid individual tiers on 2026-06-18 in favor of Antigravity CLI (we ship `generate_antigravity.py`); enterprise Code Assist and paid API keys keep Gemini CLI, so the integration stays. The 11 hook events are unchanged. v0.49.0 completed the `coreTools` → `tools.core` migration (auto-migrated; `tools.exclude` deprecated) — both are tool-allowlist keys we do not emit, so no generator change. Native project and user-tier subagents are now emitted by `generate_gemini_agents.py` for profile `full`. |
+| Earlier baseline / notes | v0.49.0 (2026-06-25) completed the `coreTools` to `tools.core` migration; the toolkit emits neither key. Gemini CLI dropped free/paid individual tiers on 2026-06-18 in favor of Antigravity CLI; enterprise Code Assist and paid API keys keep Gemini CLI, so the integration remains supported. Native project and user-tier subagents are emitted by `generate_gemini_agents.py` for profile `full`. |
 
 ### Cline
 
 | Field | Value |
 |-------|-------|
 | ID | `cline` |
+| Review 2026-10-27 | Classes A/C/D. Reviewed [4.1.26](https://github.com/cline/cline/releases/tag/v4.1.26), published 2026-10-26, independently of local installation. [Skills](https://docs.cline.bot/customization/skills) still recommend the emitted `.cline/skills/` and accept `.clinerules/skills/`. Cloud/plugin features are optional; `.clineignore` deprecation does not affect toolkit output. The extension-hook availability caveat below remains current. |
 | Docs | https://docs.cline.bot |
 | Release notes | https://github.com/cline/cline/releases |
 | Config paths | **Extension compatibility:** `.clinerules/*.md`, `.clinerules/workflows/*.md`, `.clinerules/skills/*/SKILL.md`, `.clinerules/hooks/` (project), `~/Documents/Cline/Rules/` (global rules), `~/Documents/Cline/Hooks/` (global hooks), `~/.cline/data/settings/cline_mcp_settings.json`. **CLI/SDK primary layout:** `.cline/{rules,hooks,agents,plugins,skills}/`, `~/.cline/{rules,hooks,agents,plugins,skills}/`; CLI `--hooks-dir` defaults to `~/.cline/hooks`. **Cross-tool:** `AGENTS.md` + `~/.agents/AGENTS.md` (rules sources), `.claude/skills/*/SKILL.md` (native skill discovery). |
@@ -19289,18 +19482,20 @@ For current model defaults and optional Claude-to-Codex execution, see
 | Field | Value |
 |-------|-------|
 | ID | `roo-code` |
+| Review 2026-10-27 | Classes A/C. Reviewed successor Zoo [3.92.0](https://github.com/Zoo-Code-Org/Zoo-Code/releases/tag/v3.92.0), published 2026-10-24. [Custom modes](https://docs.zoocode.dev/features/custom-modes) explicitly retain JSON `.roomodes`; [Roo-to-Zoo import](https://docs.zoocode.dev/roo-to-zoo-migration) remains documented. Model catalog and UI changes require no generator migration. |
 | Docs | https://roocodeinc.github.io/Roo-Code (frozen; docs.roocode.com 301-redirects here). Successor docs: https://docs.zoocode.dev |
-| Release notes | https://github.com/Zoo-Code-Org/Zoo-Code/releases (authoritative). **Original RooCodeInc/Roo-Code repo ARCHIVED/read-only since 2026-05-15, frozen at v3.54.0 — its feed is dead.** Successor project by former Roo contributors: **Zoo-Code-Org/Zoo-Code** (marketplace `ZooCodeOrganization.zoo-code`), active through v3.64.0 (2026-06-26). |
+| Release notes | https://github.com/Zoo-Code-Org/Zoo-Code/releases (authoritative). Original RooCodeInc/Roo-Code is archived/read-only since 2026-05-15, frozen at v3.54.0. Follow the successor **Zoo-Code-Org/Zoo-Code** (marketplace `ZooCodeOrganization.zoo-code`); the reviewed release is recorded above. |
 | Config paths | `.roomodes` (JSON still fully supported), `.roo/rules/*.md`, `.roo/rules-{slug}/*.md`, `.roo/skills/*/SKILL.md`, `~/.roo/skills/*/SKILL.md`, `.agents/skills/*/SKILL.md`, `~/.agents/skills/*`, `.roo/commands/*.md`, `~/.roo/commands/*.md`, `.roo/mcp.json`, `~/.roo/rules/`, `mcp_settings.json` + global custom modes live in VS Code globalStorage (`<globalStorage>/rooveterinaryinc.roo-cline/settings/custom_modes.yaml`), NOT `~/.roo/custom_modes.yaml` |
 | Our generators | `scripts/generate_roo_modes.py`, `scripts/generate_roo_rules.py` |
 | Tracked capabilities | `roomodes`, custom modes, Code Actions, MCP, Orchestrator mode, `whenToUse`, `description`, `roleDefinition`, `groups`, skills, slash commands |
-| Notes | Config compat with the Zoo fork is total, so both generators stay valid unchanged. `.roomodes` includes `description`/`whenToUse` for every mode (since 2026-04); JSON is still accepted (YAML is upstream-preferred but not emitted). Global install writes `~/.roo/rules/` plus `~/.agents/skills/*` (Roo/Zoo native skill discovery, shipped v3.46.0/v3.47.2; skipped when `codex` is also selected). `~/.roo/commands/` (global slash commands, since v3.25) is a documented surface not yet generated. |
+| Notes | The emitted custom-mode and rules contracts remain compatible with Zoo; this does not establish parity for every product feature. `.roomodes` includes `description`/`whenToUse` for every mode; JSON remains supported while new UI-created modes default to YAML. Global install writes `~/.roo/rules/` plus `~/.agents/skills/*` (skipped when `codex` is also selected). `~/.roo/commands/` is a documented surface not yet generated. |
 
 ### Aider
 
 | Field | Value |
 |-------|-------|
 | ID | `aider` |
+| Review 2026-10-27 | Class A. The current [options reference](https://aider.chat/docs/config/options.html) retains the emitted architect, read/conventions, lint/test, attribution and commit-language settings. This is a contract review, not a latest-release or installed-version claim. |
 | Docs | https://aider.chat/docs |
 | Changelog | https://aider.chat/HISTORY.html |
 | Config paths | `.aider.conf.yml`, `CONVENTIONS.md`, `~/.aider.conf.yml` |
@@ -19315,6 +19510,7 @@ For current model defaults and optional Claude-to-Codex execution, see
 | Field | Value |
 |-------|-------|
 | ID | `augment` |
+| Review 2026-10-27 | Class A. Current [hooks](https://docs.augmentcode.com/cli/hooks) and [subagents](https://docs.augmentcode.com/cli/subagents) retain the emitted paths and native allowlist contract. `disabled_tools` still overrides `tools`; omit it and retain the CLI's selected model. |
 | Docs | https://docs.augmentcode.com |
 | Changelog | https://www.augmentcode.com/changelog |
 | Config paths | `.augment/rules/*.md`, `.augment-guidelines` (workspace root, legacy single-file), `~/.augment/user-guidelines.md`, `.augment/agents/*.md`, `.augment/commands/*.md`, `.augment/skills/*/SKILL.md`, `.augment/settings.json`, `.augment/settings.local.json`, `~/.augment/rules/*.md`, `~/.augment/settings.json`, `/etc/augment/settings.json`. Auggie CLI also discovers skills/commands from `.claude/` and `.agents/` (`.augment/` wins on precedence). |
@@ -19327,7 +19523,7 @@ For current model defaults and optional Claude-to-Codex execution, see
 
 ### Google Antigravity
 
-Workflows retire on 2026-11-01. The generator now adds the 13 existing command
+Workflows retired on 2026-10-19. The generator adds the 13 existing command
 names as `.agents/skills/<workflow-name>/SKILL.md`, and in both documented global
 skill roots. Legacy workflow files remain with a deprecation comment. User-owned
 skill collisions and extra resources are preserved; `emit_skill_pointer=False`
@@ -19335,10 +19531,14 @@ still opts out of skill-directory writes. Doctor reports unmigrated local/global
 workflows. On native Windows, use WSL or `/migrate-workflows`; the generator
 retains legacy output and explains why it skipped protected skill writes.
 [Official migration](https://antigravity.google/docs/migration/workflows-to-skills/).
+Legacy output remains an older-client fallback until a documented removal
+release under [issue #34](https://github.com/softspark/ai-toolkit/issues/34);
+the retirement date alone does not authorize removing user workflow files.
 
 | Field | Value |
 |-------|-------|
 | ID | `google-antigravity` |
+| Review 2026-10-27 | Classes A/C/D. Reviewed App [2.27.0](https://antigravity.google/docs/changelog), published 2026-10-26, separately from CLI/IDE installations. [Migration](https://antigravity.google/docs/migration/workflows-to-skills/) now dates workflow retirement to 2026-10-19. [Hooks](https://antigravity.google/docs/hooks) adds optional `SessionStart`; only three existing handlers remain wired. |
 | Docs | https://antigravity.google/docs (official hook and configuration pages are now readable through the web index; use feature pages to verify) |
 | Changelog | https://antigravity.google/docs/changelog |
 | Config paths | Rules/workflows: `.agents/rules/*.md` (each needs `trigger:` frontmatter or Antigravity silently discards it; 24,000-byte per-file cap; always-on and global rules share a 20,000-token budget), `.agents/workflows/*.md`. Skills: canonical `.agents/skills/*/SKILL.md`; `.agent/skills/*/SKILL.md` is legacy, no longer written, and the old pointer copy is removed on reinstall. Agents: `.agents/agents/ai-toolkit-*/agent.md`. Hooks: `.agents/hooks.json` plus `.agents/hooks/ai-toolkit-antigravity-hook.py`, invoked as `python3 hooks/…` because handlers run from the `hooks.json` directory. Plugins: `.agents/plugins/<plugin>/plugin.json`. MCP: `.agents/mcp_config.json`. Cross-tool instructions: `AGENTS.md`, `GEMINI.md`. |
@@ -19346,8 +19546,8 @@ retains legacy output and explains why it skipped protected skill writes.
 | Our generators | `scripts/generate_antigravity.py` (rules with activation frontmatter, workflows, canonical skill pointer), `scripts/generate_antigravity_hooks.py` (three-event schema, `run_command` matcher, and self-contained adapter), `scripts/registered_rules.py` (registered MCP rules only when Antigravity has the server configured), `scripts/generate_antigravity_agents.py` (native subagents and explicit tool mapping), `scripts/antigravity_plugin.py` (deterministic opt-in export/verify), and `scripts/mcp_editors.py` (transactional project/global MCP adapter). |
 | Install profiles | `minimal`: rules/workflows/skills only. `standard` and `strict`: add native hooks. `full`: additionally adds native agents. Global install follows the same gates under `~/.gemini/config/`; it never auto-installs the plugin. |
 | Plugin flow | `ai-toolkit antigravity-plugin export [output]` creates a self-contained ZIP with exact manifest fields `$schema`, `name`, `description`, rules, skills, agents, hooks, runtime, and LICENSE. Verify offline with `ai-toolkit antigravity-plugin verify <archive-or-dir>`, then install manually under `.agents/plugins/<plugin>/` for a workspace, `~/.gemini/antigravity-cli/plugins/<plugin>/` for CLI, or `~/.gemini/config/plugins/<plugin>/` for the IDE/shared product. Hook commands resolve from `${extensionPath}`. |
-| Tracked capabilities | Antigravity, agent manager, artifacts, MCP, workflows, rules, skills, hooks, five native hook events (three wired), subagents, agent permissions, plugins, global skills/hooks/agents, `AGENTS.md`, `GEMINI.md`, `serverUrl` |
-| Reviewed baseline / notes | Antigravity 2.19.1 (reviewed 2026-10-01) fixes custom agents ignoring global/project rules; 2.18.1 adds plugin marketplace management. Native agent models remain inherit/flash/pro; toolkit agents preserve inherit. Previous CLI/IDE version observations are historical, not current availability guarantees. Antigravity defines `PreToolUse`, `PostToolUse`, `PreInvocation`, `PostInvocation`, and `Stop`; the toolkit wires `PreToolUse` (matcher `run_command`), `PreInvocation`, and `Stop`, because the other two always returned empty output. The shell tool is `run_command` with the command at `.toolCall.args.CommandLine`. Handlers run via `sh -c` with the working directory set to the directory containing `hooks.json` (agy 1.3.1 hook reference, confirmed by agy 1.3.1 logs on 2026-10-07). The adapter returns native camelCase payloads, object-shaped `injectSteps`, and a `decision` string for Stop while preventing re-entry loops. MCP consumes portable `transport` metadata, accepts input `url` only for migration and emits it as `serverUrl`; `httpUrl` is rejected. Optional `args`, `env`, `cwd`, `headers`, `authProviderType`, `oauth`, `disabled`, and `disabledTools` are preserved. |
+| Tracked capabilities | Antigravity, agent manager, artifacts, MCP, workflows, rules, skills, hooks, six native hook events (three wired), subagents, agent permissions, plugins, global skills/hooks/agents, `AGENTS.md`, `GEMINI.md`, `serverUrl` |
+| Reviewed baseline / notes | The release reviewed above is the Antigravity App; earlier CLI/IDE observations are historical. Native agent models remain `inherit`/`flash`/`pro`; toolkit agents preserve `inherit` and validate tool names. Antigravity defines `SessionStart`, `PreToolUse`, `PostToolUse`, `PreInvocation`, `PostInvocation`, and `Stop`; the toolkit wires only `PreToolUse` (matcher `run_command`), `PreInvocation`, and `Stop`. Optional `SessionStart` is tracked without adding a handler. The shell command is `.toolCall.args.CommandLine`. Handlers run via `sh -c` from the directory containing `hooks.json` (agy 1.3.1 runtime observation, 2026-10-07). The adapter returns native camelCase payloads, object-shaped `injectSteps`, and bounded Stop continuation. MCP normalizes legacy input `url` into `serverUrl` and rejects `httpUrl`; optional arguments, environment, working directory, authentication and tool controls remain preserved. |
 | Doc access note | Docs are a JavaScript SPA, but the official search index exposes the current MCP guide and changelog text. Verify changelog claims against the dated official entry because the MCP guide's warning can lag schema releases. |
 
 ### Codex CLI
@@ -19355,6 +19555,7 @@ retains legacy output and explains why it skipped protected skill writes.
 | Field | Value |
 |-------|-------|
 | ID | `codex-cli` |
+| Review 2026-10-27 | Classes A/B/C. Stable CLI and local daemon 0.164.0. Current [hook contracts](https://learn.chatgpt.com/docs/hooks) require SubagentStop JSON and treat Stop feedback as a new prompt; toolkit corrections also pair identical advisory invocations across global/project layers when native identity is available. Models and permissions remain configured by the user. |
 | Docs | https://learn.chatgpt.com/docs/codex/cli (official Codex CLI documentation; local version observed during the 2026-09-23 review: codex-cli 0.155.1) |
 | Release notes | https://github.com/openai/codex/releases |
 | Config paths | **Instructions:** project `AGENTS.md` (root→cwd chain, closest wins) and global `~/.codex/AGENTS.md` (`$CODEX_HOME/AGENTS.md`; `~/.codex/AGENTS.override.md` takes precedence). NOTE: `~/AGENTS.md` is NOT a global-instruction surface — Codex only reads it if a session's cwd is exactly `$HOME`. Plus `.agents/skills/*/SKILL.md`, `.codex/agents/*.toml`, `~/.codex/agents/*.toml`, `.codex/hooks.json`, `~/.codex/hooks.json`, `.codex/config.toml` (project layers, root→cwd, closest wins, trusted projects only), `~/.codex/config.toml`. **Native plugins:** root `plugin.json` (portable Agent Plugins manifest), `.codex-plugin/plugin.json` (compatibility overlay), root `skills/*/SKILL.md`, default `hooks/hooks.json`, and `.agents/plugins/marketplace.json`. |
@@ -19371,6 +19572,7 @@ retains legacy output and explains why it skipped protected skill writes.
 | Field | Value |
 |-------|-------|
 | ID | `opencode` |
+| Review 2026-10-27 | Classes A/C/D. Stable [1.19.4](https://github.com/anomalyco/opencode/releases/tag/v1.19.4), published 2026-10-22, updates bundled Bun without changing [plugin](https://opencode.ai/docs/plugins/) or [agent](https://opencode.ai/docs/agents/) contracts. Deprecated agent `tools` is already omitted. Release review is separate from the local version probe. |
 | Docs | https://opencode.ai/docs |
 | Release notes | https://github.com/sst/opencode/releases (redirects to anomalyco/opencode) |
 | Config paths | `opencode.json`, `opencode.jsonc`, `.opencode/agents/*.md`, `.opencode/commands/*.md`, `.opencode/plugins/*`, `.opencode/skills/*/SKILL.md`, `AGENTS.md`; skill fallback discovery: `.claude/skills/`, `.agents/skills/`, `~/.config/opencode/skills/`, `~/.claude/skills/`, `~/.agents/skills/`; v2 beta package/config surfaces: `skills/*.md`, `skills/**/SKILL.md`, `skills` array with local paths or HTTP URLs |
@@ -19772,7 +19974,7 @@ category: reference
 service: ai-toolkit
 tags: [windows, wsl, install, uninstall, dependencies, hooks, security]
 created: "2026-04-24"
-last_updated: "2026-10-02"
+last_updated: "2026-10-27"
 description: "Windows support model for ai-toolkit: WSL, Git Bash, dependency detection, hooks, and fail-closed managed mutations."
 ---
 
@@ -19835,8 +20037,8 @@ Antigravity's new workflow-to-skill replacements also require these primitives.
 On native Windows, that optional generation step prints a WSL or
 `/migrate-workflows` instruction and skips the new skill writes, while preserving
 the existing legacy workflow and catalogue-pointer output. Use WSL to generate
-the replacements safely, or the Antigravity migration command before workflows
-retire on 2026-11-01. No unprotected transaction fallback is used.
+the replacements safely, or use the Antigravity migration command. Legacy
+workflows retired on 2026-10-19. No unprotected transaction fallback is used.
 
 ## Verification
 
@@ -19866,6 +20068,137 @@ description: "Section index for ai-toolkit troubleshooting, covering the Claude 
 Problem resolution guides.
 
 - [Claude App Plugin Loads Twice in Claude Code](plugin-double-load.md) -- hooks fire twice after the plugin ZIP is uploaded next to a global install.
+
+---
+
+## kb/troubleshooting/claude-teammate-startup.md
+
+---
+title: "Claude Teammates Wait at Startup or Remain Idle"
+category: troubleshooting
+service: ai-toolkit
+tags: [claude-code, teammates, subagents, tmux, permissions, startup]
+created: "2026-10-27"
+last_updated: "2026-10-27"
+description: "Distinguish hidden startup consent, idle teammates and stuck shell waits without approving prompts or terminating unrelated sessions."
+---
+
+# Claude Teammates Wait at Startup or Remain Idle
+
+## Symptoms and confirmed cause
+
+A split-pane teammate has a live process but produces no work or messages.
+Messages in its inbox remain unread. A confirmed cause on Claude Code 2.1.311
+was the startup dialog **Allow external CLAUDE.md file imports?** in every
+teammate pane. The teammates had not reached their assigned tasks.
+
+The lead started at a repository root, whose `CLAUDE.md` imported `@AGENTS.md`.
+Teammates started in module subdirectories. The imported root file was outside
+their working directories and therefore required external-import consent, even
+though it was in the same repository. General workspace trust and external-import
+consent are separate decisions. A switched Claude profile can also have different
+recorded consent from the original profile.
+
+This is a startup approval wait, not evidence of a model or MCP deadlock. An idle
+process is not itself a failure: a teammate remains addressable after its turn.
+
+## Inspect without changing the session
+
+1. Identify the effective configuration directory. Use `CLAUDE_CONFIG_DIR` when
+   set; with toolkit account routing, inspect `ai-toolkit claude-switch status
+   --json`. Do not assume the relevant data is under `~/.claude`.
+2. Read `teams/session-<prefix>/config.json` in that directory. Match the lead
+   session, teammate names, working directories and tmux pane IDs. Treat these
+   files as runtime state; do not edit them.
+3. Inspect the exact teammate pane. A process command line can show which tmux
+   socket the lead created. Replace the example socket and pane with observed
+   values:
+
+   ```bash
+   tmux -L <observed-socket> list-panes -a -F '#{pane_id} #{pane_pid} #{pane_dead} #{pane_current_command}'
+   tmux -L <observed-socket> capture-pane -p -t <observed-pane> -S -60
+   ```
+
+4. Classify the last visible state: startup trust/import dialog, permission
+   request, active tool call, API failure, or finished/idle. Record the session,
+   timestamp and waiting reason. Redact private prompts and credentials before
+   sharing captured output. Unread inbox entries support a startup-wait diagnosis
+   but do not prove it without the pane or transcript evidence.
+5. Recheck that the process and pane still belong to this session before any
+   recovery action. A closed socket means the earlier observation is historical.
+
+In-process teammates can be inspected from the lead's agent panel instead.
+Read the selected teammate's transcript; do not infer readiness from a row alone.
+
+## Recovery and prevention
+
+- For an external-import dialog, show the user the exact imported path and let
+  them decide. Review the file and any nested imports first. Do not press approval
+  keys, copy trust flags from another profile, or change permissions automatically.
+- Prefer starting the lead and teammates at the same already-trusted repository
+  root. Assign `app/api/` or `app/frontend/` as file ownership, and scope commands
+  to those paths. This keeps the root `@AGENTS.md` inside the startup directory;
+  other external imports can still require consent.
+- After spawning, confirm startup before waiting for results. Do not start more
+  teammates as a workaround for an unseen consent dialog.
+- After collecting the final report, send a native teammate shutdown request and
+  check its result. `TaskStop` cancellation of an ordinary background subagent is
+  a different lifecycle operation. A teammate may finish its current request or
+  tool call before shutdown. Do not kill another session's tmux server.
+
+Updating toolkit hooks replaces the two exact older toolkit idle reminders,
+including untagged copies left by Claude settings rewrites. Customized commands,
+matchers and groups containing additional user handlers are preserved. If a
+preserved custom reminder still advises `TaskStop` for a teammate, review that
+local customization separately.
+
+## Shell waits that match themselves
+
+A separate source of indefinite waits is a shell loop such as
+`until ! pgrep -f 'runtime-tests'; do sleep 5; done`. The shell's own command line
+contains the searched string, so `pgrep -f` can keep matching the waiting shell
+after the real test process has exited. Two identical waiters can match each
+other as well.
+
+Inspect PID, PPID, elapsed time and full command lines to establish this condition.
+Do not launch another copy of the loop as a diagnostic. Prefer the original tool
+task's completion result or a captured child PID and bounded wait. Keep separate
+the test process exit, its output file and the waiting shell's state. Stop only a
+confirmed, owned waiter after approval; retain its output and audit evidence.
+
+## Account wrapper termination
+
+Before this fix, `ai-toolkit claude-switch` and `codex-switch` used a synchronous
+Node child wait. Sending `SIGHUP` or `SIGTERM` only to the wrapper could terminate
+the wrapper without delivering the signal to its client. An isolated fake-client
+test reproduces that leak for both account commands. The wrapper now forwards
+those shutdown signals and waits for the client to exit, preserving its exit
+code or signal-derived status. Terminal `SIGINT` already reaches the shared
+process group, so the wrapper waits without sending a duplicate interrupt.
+
+This explains one way a client can outlive its launcher; it does not establish
+which signal an IDE delivered to an already-orphaned process. Updating the
+wrapper affects new launches. Inspect old processes and their children before
+any separately approved cleanup; never stop every process named `claude`.
+
+## Verification and scope
+
+After a user-approved recovery, confirm that the startup dialog is gone, the
+teammate receives its assignment, and its transcript records new task activity.
+Process existence alone is insufficient. After shutdown, confirm the specific
+teammate exits and the lead receives the outcome.
+
+Claude Code 2.1.311 includes fixes for repeated `SubagentStop` hooks, late MCP
+tool availability and interrupted MCP reads. These do not remove the deliberate
+external-import consent gate. Keep runtime version fixes distinct from toolkit
+instruction and configuration fixes.
+
+Sources reviewed 2026-10-27:
+
+- [Claude memory imports](https://code.claude.com/docs/en/memory#import-additional-files)
+- [Agent teams, startup, shutdown and limitations](https://code.claude.com/docs/en/agent-teams)
+- [Subagent lifecycle](https://code.claude.com/docs/en/sub-agents)
+- [Claude Code 2.1.311 release notes](https://github.com/anthropics/claude-code/releases/tag/v2.1.311)
 
 ---
 

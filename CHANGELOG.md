@@ -7,6 +7,49 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## v5.4.2 - Teammate readiness and editor compatibility (2026-10-27)
+
+### Fixed
+
+- CLI documentation export now allows up to 16 MiB of captured generator output.
+  The full catalogue crossed Node's default 1 MiB limit and broke `llms-txt` and
+  `generate-all`; buffer failures now report their cause instead of an empty
+  message, and an overflow leaves the previous full export intact.
+- Account-switch wrappers forward parent-directed SIGHUP/SIGTERM to their own
+  Claude/Codex client and reap it, preserving exit status. Terminal process-group
+  SIGINT is not delivered twice. Isolated fake-client tests reproduce the former
+  orphan-process leak; already-running clients still need separate inspection.
+- Claude orchestration checks teammate startup before waiting for work. A
+  documented external-import consent gate explains apparently hung split-pane
+  teammates launched in module directories. The advisory idle reminder uses
+  native teammate shutdown and does not demand edits from read-only reviewers.
+- Codex search-first guards no longer re-arm on their own hook continuation or
+  recognized conversational handoffs, and honor `stop_hook_active`. SubagentStop
+  emits native JSON. Identical advisory/state hook invocations are paired across
+  global and project layers when native session/turn identity is available;
+  permission guards, different runtimes and unrelated user hooks still execute.
+- Codex MCP refresh preserves omitted user approval and tool-filter fields for
+  an unchanged connection. Explicit empty allowlists remain empty. Different
+  endpoints or authentication contexts do not inherit previous trust.
+- Native Windows state reads use binary mode and exclude NTFS creation-time
+  differences from stable-read identity (#39). Python tests isolate USERPROFILE
+  together with HOME so test data stays out of real Windows profiles (#41).
+- Antigravity workflow warnings use the current October 19 retirement date.
+  Same-named native skills remain the replacement; legacy files are retained
+  for older clients under the existing compatibility policy.
+
+### Changed
+
+- Reviewed all 13 integrations against current official references. Copilot
+  metadata recognizes `userPromptTransformed`; Antigravity documents six native
+  lifecycle events while the toolkit still wires its three useful handlers.
+- Updated model reference guidance for GPT-6.1 Terra and the completed GPT-5.5
+  retirement in ChatGPT-authenticated Codex. Runtime model choices are unchanged.
+- Corrected stale architecture summaries to the existing 29 hook entries across
+  14 events; this release does not add a Claude lifecycle event.
+
+---
+
 ## v5.4.1 - Retry delay for rate-limited usage reads (2026-10-15)
 
 ### Changed

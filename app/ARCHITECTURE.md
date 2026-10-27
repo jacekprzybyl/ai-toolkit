@@ -8,7 +8,7 @@ Universal multi-agent system for software development. Works across all reposito
 |-----------|-------|
 | Agents | See agents catalog |
 | Skills | See skills catalog |
-| Hooks | 14 events / 28 entries (SessionStart ×2, Notification ×1, PreToolUse ×5, UserPromptSubmit ×2, PostToolUse ×5, Stop ×4, TaskCompleted ×1, TeammateIdle ×1, SubagentStart ×1, SubagentStop ×1, PreCompact ×2, SessionEnd ×1, InstructionsLoaded ×1, ConfigChange ×1) plus statusLine |
+| Hooks | 14 events / 29 entries (SessionStart ×2, Notification ×1, PreToolUse ×5, UserPromptSubmit ×2, PostToolUse ×6, Stop ×4, TaskCompleted ×1, TeammateIdle ×1, SubagentStart ×1, SubagentStop ×1, PreCompact ×2, SessionEnd ×1, InstructionsLoaded ×1, ConfigChange ×1) plus statusLine |
 
 ---
 
@@ -55,6 +55,7 @@ The toolkit is organised as five stacked layers. Higher layers depend on lower l
 - A skill MAY trigger an agent (`agent: <name>` frontmatter) — that's Layer 2 calling Layer 4.
 - A hook MUST NOT call a skill — hooks are deterministic shell, skills are LLM-driven.
 - A plugin MAY bundle skills + agents + hooks, but never the inverse.
+- Teammate readiness includes startup consent, separate from task execution. The orchestrator checks the actual panel/pane, reports waits, and uses native teammate shutdown after collecting results; see `kb/troubleshooting/claude-teammate-startup.md`.
 - Claude Code reads CLAUDE.md across layers. Claude Chat/Cowork uses app-global/folder instructions and plugin skills instead; `ai-toolkit claude-app export` (backed by `claude_app.py`) builds the uploadable plugin ZIP + Cowork global-instructions and renders core rules into `ai-toolkit-rules` for that runtime.
 
 ---

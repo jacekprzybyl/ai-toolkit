@@ -196,7 +196,7 @@ PY
         grep -q "^name: $name$" "$skill"
         grep -q '^description: ' "$skill"
         grep -q 'ai-toolkit-managed: antigravity-workflow-skill' "$skill"
-        grep -q 'DEPRECATED: workflows retire 2026-11-01' "$workflow"
+        grep -q 'DEPRECATED: workflows retired 2026-10-19' "$workflow"
         count=$((count + 1))
     done
     [ "$count" -eq 13 ]

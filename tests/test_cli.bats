@@ -226,6 +226,29 @@ teardown() {
     [ "$size_full" -gt "$size_index" ]
 }
 
+@test "cli: large generated artifacts fit a bounded buffer and overflow reports its cause" {
+    large_bytes=$((1024 * 1024 + 128))
+    overflow_bytes=$((17 * 1024 * 1024))
+    fixture="$TEST_TMP/toolkit"
+    mkdir -p "$fixture/bin" "$fixture/scripts" "$TEST_TMP/output"
+    cp "$TOOLKIT_DIR/bin/ai-toolkit.js" "$fixture/bin/ai-toolkit.js"
+    cp "$TOOLKIT_DIR/package.json" "$fixture/package.json"
+    cat > "$fixture/scripts/generate_llms_txt.py" <<'PY'
+import os
+import sys
+sys.stdout.write("A" * int(os.environ["GENERATOR_FIXTURE_BYTES"]) if "--full" in sys.argv else "index\n")
+PY
+    cd "$TEST_TMP/output"
+    run env GENERATOR_FIXTURE_BYTES="$large_bytes" node "$fixture/bin/ai-toolkit.js" llms-txt
+    [ "$status" -eq 0 ]
+    [ "$(wc -c < llms-full.txt | xargs)" -eq "$large_bytes" ]
+
+    run env GENERATOR_FIXTURE_BYTES="$overflow_bytes" node "$fixture/bin/ai-toolkit.js" llms-txt
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"ENOBUFS"* ]] || { echo "$output"; return 1; }
+    [ "$(wc -c < llms-full.txt | xargs)" -eq "$large_bytes" ]
+}
+
 # ── generate-all (merged: exits 0 + creates files) ──────────────────────────
 
 @test "cli: generate-all creates all expected files" {

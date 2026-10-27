@@ -45,6 +45,7 @@ SUPPORTED_EVENTS = frozenset({
     "subagentStart",
     "subagentStop",
     "userPromptSubmitted",
+    "userPromptTransformed",
 })
 MATCHER_EVENTS = frozenset({
     "notification",

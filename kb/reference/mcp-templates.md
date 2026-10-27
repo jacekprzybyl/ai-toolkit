@@ -3,9 +3,9 @@ title: "MCP Server Templates"
 category: reference
 service: ai-toolkit
 tags: [mcp, templates, servers, configuration, editors, inject-mcp, external-templates]
-version: "1.7.0"
+version: "1.8.0"
 created: "2026-04-07"
-last_updated: "2026-09-10"
+last_updated: "2026-10-27"
 description: "Reference for 28 built-in MCP server templates, external template injection via inject-mcp, and native editor MCP installation support."
 ---
 
@@ -58,12 +58,20 @@ When `install` runs with `--scope project`, ai-toolkit also updates the project'
 | `windsurf` | global | `~/.codeium/windsurf/mcp_config.json` | Global-only official config |
 | `cline` | global | `~/.cline/data/settings/cline_mcp_settings.json` | Global-only official config |
 | `augment` | global | `~/.augment/settings.json` | Global-only settings file |
-| `codex` | project + global | `.codex/config.toml`, `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`) | Validated TOML `mcp_servers` tables in a marker-bounded managed block; unrelated TOML/comments preserved |
+| `codex` | project + global | `.codex/config.toml`, `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`) | Validated TOML `mcp_servers` tables in a marker-bounded managed block; unrelated TOML/comments and omitted local tool policies for unchanged connections preserved |
 
 Project-local `ai-toolkit install --local` also mirrors `.mcp.json` into Claude
 project settings plus selected project editors that have official
 repository/workspace MCP files (`cursor`, `copilot`, `antigravity`, `roo`, `codex`). Codex
 loads `.codex/config.toml` only for trusted project layers.
+
+Refreshing an unchanged Codex MCP connection retains locally configured
+`enabled`, `enabled_tools`, `disabled_tools`, `default_tools_approval_mode`, and
+per-tool `tools` policies when the incoming template omits them. Explicit
+template policies replace those fields, including an empty allowlist. A changed
+transport, endpoint, credentials, environment, working directory or OAuth scopes
+does not inherit the previous connection's approval. This keeps a local trust
+decision from being transferred to a different server.
 
 ## Template List
 

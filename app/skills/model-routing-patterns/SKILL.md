@@ -85,7 +85,7 @@ executor, not a Claude `model:` value or an automatic Claude Team member. Reuse
 the installed plugin instead of generating another wrapper or editing its cache.
 <!-- CLAUDE_CODE_ONLY_END -->
 
-## Reviewed model reference (2026-10-08)
+## Reviewed model reference (2026-10-27)
 
 | Model | Claude API ID | API effort default |
 |-------|---------------|--------------------|
@@ -95,10 +95,11 @@ the installed plugin instead of generating another wrapper or editing its cache.
 | Claude Haiku 5.5 | `claude-haiku-5-5` | `medium` |
 
 Codex (account and client availability decide): `gpt-6-astra` is the most
-capable model; `gpt-6.1-sol` is the recommended
-model for complex coding and agentic work and replaces `gpt-6-sol`; `gpt-6-luna`
-fits focused, repeatable tasks. GPT-5.5 leaves Codex with ChatGPT sign-in on
-2026-10-14. Sol 6.1 accepts `low` to `max` effort but not `none` or `minimal`.
+capable model; `gpt-6.1-sol` suits repeated complex coding and agentic work;
+`gpt-6.1-terra` suits writing, visual understanding and computer use; `gpt-6-luna`
+fits focused, repeatable tasks. GPT-5.5 retired from Codex with ChatGPT sign-in
+on 2026-10-14; API-key sessions and the OpenAI API are unaffected. Sol 6.1 accepts
+`low` to `max` effort but not `none` or `minimal`; Terra 6.1 also accepts `none`.
 
 These are dated identifiers, not a runtime upgrade policy. Check the provider's
 model availability and current [pricing](https://platform.claude.com/docs/en/about-claude/pricing)

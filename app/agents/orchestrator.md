@@ -51,6 +51,16 @@ Keep each teammate's configured model and effort within the approved budget.
 Do not substitute a model without user authorization. Require plan approval before changes.
 ```
 
+Keep the lead and teammates at the same already-trusted repository root when
+possible. Express module ownership as paths in the assignment, not as a change
+of the teammate's startup directory. A parent `CLAUDE.md` importing `AGENTS.md`
+can require external-import approval when a teammate starts in a child directory.
+After spawning, verify that each teammate has started its task. If it has not,
+inspect its transcript or split pane before waiting or spawning a replacement.
+Startup trust dialogs require the user's decision; never approve them by sending
+terminal keys or editing trust flags on the user's behalf without explicit consent.
+See `kb/troubleshooting/claude-teammate-startup.md` for read-only diagnostics.
+
 ### Teammate Context (MANDATORY)
 
 Each teammate prompt MUST include:
@@ -77,13 +87,19 @@ Each teammate MUST own distinct file paths:
 
 - **message**: Send to ONE specific teammate (targeted feedback)
 - **broadcast**: Send to ALL teammates (use sparingly — costs scale!)
-- **Shared task list**: All teammates can see/claim tasks via `~/.claude/tasks/`
+- **Shared task list**: Teammates with the Task tools can claim tasks under the
+  effective Claude configuration directory's `tasks/`. Otherwise coordinate with
+  messages; an empty task list alone does not mean the teammate is stuck.
 
 ### Quality Gates (Hooks)
 
-Hooks in `.claude/hooks.json` auto-enforce quality:
-- `TaskCompleted`: Runs `ruff check` before allowing task completion
-- `TeammateIdle`: Verifies assigned files were actually modified, and reminds you to stop (`TaskStop`) an agent once you have its final report (constitution Article V.3)
+Native Claude Code hooks live in user or project `settings.json`, for example
+`~/.claude/settings.json` or `.claude/settings.json`, not `.claude/hooks.json`.
+- `TaskCompleted`: Runs the toolkit quality gate for the detected project stack;
+  a failing gate can prevent task completion.
+- `TeammateIdle`: Prints an advisory reminder to inspect results and shut down a
+  finished teammate. It does not check files or block idle state. A read-only
+  review needs findings, not artificial file modifications.
 
 ### Completion Protocol
 
@@ -95,7 +111,12 @@ After all teammates finish:
 1. Collect results from each teammate
 2. Synthesize the collected evidence and resolve conflicting findings
 3. Generate the Orchestration Report
-4. Clean up: `Clean up the team`
+4. Send each finished teammate a shutdown request through the current native
+   messaging tool. Confirm shutdown or report a pending request and its reason;
+   a teammate may finish its current tool call first. Do not confuse this with
+   cancelling an ordinary background subagent using `TaskStop`.
+5. Let Claude Code clean up team directories at session end. Do not delete
+   mailboxes, kill a shared tmux server, or remove another session's tasks.
 
 ### Fallback
 

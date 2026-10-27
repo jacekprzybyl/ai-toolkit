@@ -5,7 +5,7 @@ service: ai-toolkit
 tags: [codex, compatibility, install, skills, hooks]
 version: "1.3.0"
 created: "2026-04-12"
-last_updated: "2026-10-08"
+last_updated: "2026-10-27"
 description: "Reference for how ai-toolkit maps Claude-oriented skills, hooks, and plugin packs to Codex CLI."
 ---
 
@@ -273,7 +273,18 @@ without regex validation because Codex ignores them.
 
 The Stop search adapter returns `decision: "block"` with `reason` to request a
 continuation. It must not return `continue: false`, which stops the turn. The
-search reminder remains one-shot.
+search reminder remains one-shot and respects `stop_hook_active`. Hook-generated
+continuation prompts and recognized conversational handoffs do not arm a new
+search requirement. `SubagentStop` emits native JSON `systemMessage` output,
+not plain text or a continuation request.
+
+Codex loads global and project hook layers additively. Equivalent toolkit
+advisory/state handlers pair duplicate invocations across those layers using
+the session, turn, event, full payload and runtime content digest. Subagent/tool
+events additionally require their native agent/tool-call identity. Same-layer
+repeats and different runtime versions still execute. Missing identity leaves
+both handlers active; this does not deduplicate `SessionStart` or permission
+guards, and it never suppresses unrelated user hooks.
 
 The generator merges these Codex-compatible events into project or user
 `hooks.json`, preserving unrelated user handlers and replacing only commands
@@ -335,6 +346,11 @@ hook helper. Set `AI_TOOLKIT_HOOK_VERBOSE=1` only when debugging hook output
 outside the Codex UI.
 
 ## MCP Configuration
+
+Refreshing the same MCP connection preserves omitted local enable/disable,
+allowlist/denylist and approval policy fields. Explicit template fields replace
+them; changed transport/authentication context does not inherit prior trust.
+See [MCP templates](mcp-templates.md) for the refresh contract.
 
 Codex MCP servers are supported at both documented scopes:
 

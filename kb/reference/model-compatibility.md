@@ -3,15 +3,15 @@ title: "Model compatibility for skills and agents"
 category: reference
 service: ai-toolkit
 tags: [models, skills, agents, codex, copilot, claude, effort]
-version: "1.2.0"
+version: "1.3.0"
 created: "2026-09-23"
-last_updated: "2026-10-08"
+last_updated: "2026-10-27"
 description: "Dated model snapshot and rules separating runtime selection, API parameters and prompt guidance."
 ---
 
 # Model compatibility for skills and agents
 
-Reviewed 2026-10-08. These are documentation snapshots, not a guarantee that a
+Reviewed 2026-10-27. These are documentation snapshots, not a guarantee that a
 model is enabled on a particular account. Check the active client's picker and
 policy before selecting a model. Preserve a user's explicit choice; do not
 replace a tiered workflow with a single flagship model.
@@ -36,8 +36,8 @@ requires 2.1.293 or later. See
 
 | Provider/surface | Current examples at review time | Important boundary |
 |------------------|---------------------------------|--------------------|
-| OpenAI API | `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6-luna` (`gpt-6-sol` still listed) | Use Responses for reasoning with tools; Astra and Sol 6.1 reject `none` (Sol 6.1 also `minimal`; use `low`), while GPT-6 Sol/Luna allow it |
-| Codex | `gpt-6.1-sol` recommended for complex coding, `gpt-6-astra` most capable, `gpt-6-luna` for focused tasks, according to account/client availability | Start from the selected/default effort; higher reasoning and orchestration modes are explicit choices |
+| OpenAI API | `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-luna` (`gpt-6-sol` still listed) | Use Responses for reasoning with tools; Astra and Sol 6.1 reject `none` (Sol 6.1 also `minimal`; use `low`), while Terra 6.1 and GPT-6 Sol/Luna allow `none` |
+| Codex | `gpt-6.1-sol` for repeated complex work, `gpt-6-astra` most capable, `gpt-6.1-terra` for writing and visual/computer work, `gpt-6-luna` for focused tasks, according to account/client availability | Start from the selected/default effort; higher reasoning and orchestration modes are explicit choices |
 | Claude API | `claude-opus-5-5`, `claude-fable-5-1`, `claude-sonnet-5-5`, `claude-haiku-5-5` | Opus 5.5 and Haiku 5.5 default to medium effort, Fable/Sonnet to high; all four support `low` to `max` |
 | GitHub Copilot | Offers models from multiple providers, including current GPT-6 and Claude families | Plan, organization policy and client determine the actual list; utility models are not selectable session models |
 
@@ -48,7 +48,7 @@ Sources: [OpenAI latest model guide](https://developers.openai.com/api/docs/guid
 [Copilot availability](https://docs.github.com/en/copilot/reference/ai-models/supported-models).
 
 Retirement is also surface-specific. At this review date, Codex with ChatGPT
-sign-in has retired GPT-5.4/mini and announces GPT-5.5 retirement for 2026-10-14.
+sign-in has retired GPT-5.4/mini and GPT-5.5 (2026-10-14).
 That notice does not retire those models from the OpenAI API or establish
 Copilot availability. Check the relevant account/client instead of applying
 one product's retirement list globally. See the Codex models reference above.

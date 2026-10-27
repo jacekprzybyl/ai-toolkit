@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { execFileSync, spawnSync } = require('child_process');
+const { execFileSync, spawn, spawnSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const { constants: osConstants } = require('os');
@@ -15,6 +15,8 @@ const CWD = process.cwd();
 
 /** Minimum Python the toolkit scripts require: [major, minor]. */
 const PYTHON_MIN = [3, 11];
+/** Bound captured generator output while allowing the complete skill/KB export. */
+const GENERATOR_MAX_BUFFER_BYTES = 16 * 1024 * 1024;
 
 if (!process.env.HOME) {
   console.error('Error: HOME environment variable is not set');
@@ -215,9 +217,13 @@ function pythonHint() {
 function runGenerator(scriptName, extraArgs = []) {
   requirePython();
   try {
-    return execFileSync('python3', [scriptPath(scriptName), ...extraArgs], { cwd: TOOLKIT_DIR });
+    return execFileSync('python3', [scriptPath(scriptName), ...extraArgs], {
+      cwd: TOOLKIT_DIR,
+      maxBuffer: GENERATOR_MAX_BUFFER_BYTES,
+    });
   } catch (err) {
-    console.error(`Error running ${scriptName}: ${err.stderr ? err.stderr.toString().trim() : err.message}`);
+    const detail = err.stderr?.toString().trim() || err.message;
+    console.error(`Error running ${scriptName}: ${detail}`);
     process.exit(1);
   }
 }
@@ -234,17 +240,47 @@ function run(script, args = [], opts = {}) {
   // their relative asset paths resolve; the user's own directory travels in
   // AI_TOOLKIT_USER_CWD so a relative --output still lands where they typed
   // the command, not inside node_modules (v4.32.2).
-  const result = spawnSync('python3', [script, ...args], {
+  const options = {
     stdio: 'inherit',
     cwd: opts.cwd || CWD,
     env: { ...process.env, AI_TOOLKIT_USER_CWD: CWD },
-  });
-  if (opts.preserveSignal && result.signal) {
-    process.exit(128 + osConstants.signals[result.signal]);
+  };
+  if (opts.preserveSignal) {
+    runAccountCommand(script, args, options);
+    return;
   }
+  const result = spawnSync('python3', [script, ...args], options);
   if (result.status !== 0) {
     process.exit(result.status || 1);
   }
+}
+
+/** Keep account clients supervised when the terminal closes the Node wrapper. */
+function runAccountCommand(script, args, options) {
+  const child = spawn('python3', [script, ...args], options);
+  const handlers = new Map();
+  for (const signal of ['SIGHUP', 'SIGTERM']) {
+    const forward = () => child.kill(signal);
+    handlers.set(signal, forward);
+    process.on(signal, forward);
+  }
+  // Terminal SIGINT already reaches the child's process group. Keep waiting
+  // when the client handles Ctrl+C; forwarding again could interrupt it twice.
+  const interrupt = () => {};
+  process.on('SIGINT', interrupt);
+  const cleanup = () => {
+    for (const [signal, handler] of handlers) process.removeListener(signal, handler);
+    process.removeListener('SIGINT', interrupt);
+  };
+  child.once('error', (error) => {
+    cleanup();
+    console.error(`Error starting account command: ${error.message}`);
+    process.exitCode = 1;
+  });
+  child.once('exit', (code, signal) => {
+    cleanup();
+    process.exitCode = signal ? 128 + osConstants.signals[signal] : (code ?? 1);
+  });
 }
 
 /**

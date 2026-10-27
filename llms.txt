@@ -41,6 +41,7 @@
 - [Ecosystem sync, 2026-09-23](kb/planning/ecosystem-sync-20260923.md)
 - [Ecosystem review for 5.1.0](kb/planning/ecosystem-sync-20261002.md)
 - [Ecosystem review for 5.2.0](kb/planning/ecosystem-sync-20261005.md)
+- [Ecosystem sync and Claude teammate diagnostics](kb/planning/ecosystem-sync-20261027.md)
 - [Editor support and delegation refresh](kb/planning/editor-and-delegation-refresh-20261001.md)
 - [Model compatibility refresh](kb/planning/model-compatibility-refresh-20260923.md)
 - [SOP: Ecosystem Sync](kb/procedures/sop-ecosystem-sync.md)
@@ -89,4 +90,5 @@
 - [Unique Features & Differentiators](kb/reference/unique-features.md)
 - [Windows Support](kb/reference/windows-support.md)
 - [Troubleshooting](kb/troubleshooting/README.md)
+- [Claude Teammates Wait at Startup or Remain Idle](kb/troubleshooting/claude-teammate-startup.md)
 - [Claude App Plugin Loads Twice in Claude Code](kb/troubleshooting/plugin-double-load.md)

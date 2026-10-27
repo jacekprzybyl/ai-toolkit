@@ -39,7 +39,7 @@ mkdir -p "$STATE_DIR" 2>/dev/null
 PROMPT_HEAD="${PROMPT_TEXT#"${PROMPT_TEXT%%[![:space:]]*}"}"
 PROMPT_IS_QUESTION=1
 case "$PROMPT_HEAD" in
-    '<task-notification'*|'<ci-monitor-event'*|'<system-reminder'*|\
+    '<task-notification'*|'<ci-monitor-event'*|'<system-reminder'*|'<hook_prompt'*|\
     '<local-command-'*|'<command-name'*|'<command-message'*) PROMPT_IS_QUESTION=0 ;;
 esac
 # A single opaque token — API key, hash, URL, path — carries no question. A
@@ -47,6 +47,8 @@ esac
 if [ "$(printf '%s' "$PROMPT_TEXT" | wc -w | tr -d ' ')" -le 1 ]; then
     PROMPT_IS_QUESTION=0
 fi
+SEARCH_INTENT=$(printf '%s' "$PROMPT_TEXT" | python3 -I -S "$(dirname "$0")/_prompt-intent.py" --search-required 2>/dev/null) || SEARCH_INTENT=yes
+[ "$SEARCH_INTENT" = "no" ] && PROMPT_IS_QUESTION=0
 
 if [ "$PROMPT_LEN" -gt 30 ] && \
    [ "$PROMPT_IS_QUESTION" -eq 1 ] && \

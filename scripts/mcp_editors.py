@@ -162,6 +162,9 @@ _CODEX_PORTABLE_TRANSPORT_KEYS = {
     "stdio": "command",
 }
 _CODEX_APPROVAL_MODES = frozenset({"auto", "prompt", "writes", "approve"})
+_CODEX_POLICY_KEYS = frozenset({
+    "enabled", "enabled_tools", "disabled_tools", "default_tools_approval_mode", "tools",
+})
 _UNSUPPORTED_DIRECTORY_FSYNC_ERRNOS = frozenset(
     {
         errno.EBADF,
@@ -992,8 +995,11 @@ def _prepare_remove_json_servers(
 def _prepare_merge_toml_servers(path: Path, servers: dict) -> ConfigUpdate:
     original_bytes, original = _load_toml_document(path)
     base, managed = _split_codex_managed_block(original, path)
+    previous = _parse_toml(original, path).get("mcp_servers", {})
     normalized = {
-        _validate_server_name(name): _normalize_toml_server(value)
+        _validate_server_name(name): _preserve_codex_policy(
+            previous.get(name, {}), _normalize_toml_server(value)
+        )
         for name, value in servers.items()
     }
     base = _remove_selected_toml_server_tables(base, set(normalized), path)
@@ -1005,6 +1011,28 @@ def _prepare_merge_toml_servers(path: Path, servers: dict) -> ConfigUpdate:
         original=original_bytes,
         content=rendered.encode("utf-8"),
     )
+
+
+def _preserve_codex_policy(previous: dict, incoming: dict) -> dict:
+    """Keep omitted local policy without granting trust to a new connection."""
+    connection_keys = _CODEX_STDIO_SERVER_KEYS | _CODEX_HTTP_SERVER_KEYS | {
+        "scopes", "oauth_resource",
+    }
+    previous_connection = {
+        key: previous[key] for key in connection_keys
+        if key in previous and previous[key] not in (None, {}, [])
+    }
+    incoming_connection = {
+        key: incoming[key] for key in connection_keys
+        if key in incoming and incoming[key] not in (None, {}, [])
+    }
+    if previous_connection != incoming_connection:
+        return incoming
+    merged = dict(incoming)
+    for key in _CODEX_POLICY_KEYS:
+        if key not in incoming and key in previous:
+            merged[key] = copy.deepcopy(previous[key])
+    return _normalize_toml_server(merged)
 
 
 def _prepare_remove_toml_servers(
@@ -1040,7 +1068,10 @@ def _normalize_toml_server(server: dict) -> dict:
             "Codex MCP 'tools' must be a per-tool policy object, not a Copilot tool list"
         )
 
-    data = {key: value for key, value in source.items() if value not in (None, {}, [])}
+    data = {
+        key: value for key, value in source.items()
+        if value is not None and (key in _CODEX_POLICY_KEYS or value not in ({}, []))
+    }
     has_command = "command" in data
     has_url = "url" in data
     if has_command == has_url:

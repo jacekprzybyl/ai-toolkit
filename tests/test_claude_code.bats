@@ -305,6 +305,29 @@ for event, groups in hooks.items():
 PY
 }
 
+@test "claude-code: idle reminder uses teammate shutdown and permits read-only completion" {
+    run python3 - "$TOOLKIT_DIR/app/hooks.json" <<'PY'
+import json
+import subprocess
+import sys
+
+groups = json.load(open(sys.argv[1]))["hooks"]["TeammateIdle"]
+handlers = [handler for group in groups for handler in group["hooks"]]
+assert len(handlers) == 1
+result = subprocess.run(
+    ["bash", "-c", handlers[0]["command"]],
+    input=json.dumps({"hook_event_name": "TeammateIdle", "teammate_name": "reviewer"}),
+    text=True, capture_output=True, timeout=5, check=False,
+)
+assert result.returncode == 0, result.stderr
+assert "shutdown request" in result.stdout, result.stdout
+assert "read-only" in result.stdout, result.stdout
+assert "TaskStop" not in result.stdout, result.stdout
+assert "All assigned files modified" not in result.stdout, result.stdout
+PY
+    [ "$status" -eq 0 ]
+}
+
 @test "claude-code: merge-hooks treats a legacy handler that differs only in async as the same hook" {
     tmp="$(mktemp -d)"
     cat > "$tmp/settings.json" <<'EOF'

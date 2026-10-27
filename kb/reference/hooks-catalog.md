@@ -4,9 +4,9 @@ category: reference
 section: reference
 service: ai-toolkit
 tags: [hooks, quality, safety, enforcement, settings.json]
-version: "1.18.0"
+version: "1.19.0"
 created: "2026-03-27"
-last_updated: "2026-10-08"
+last_updated: "2026-10-27"
 description: "Complete reference of all ai-toolkit hooks: events, scripts, installation, and runtime behavior."
 ---
 
@@ -202,6 +202,10 @@ Codex-generated hooks intentionally run this script without
 `AI_TOOLKIT_HOOK_FORMAT=json` by default because Codex renders
 `additionalContext` visibly in the TUI; the search-first flag side effect still
 arms the corrective Stop hook.
+
+Recognized conversational handoffs and hook-generated continuation text do not
+arm search-first enforcement. The Stop guard honors `stop_hook_active`, preventing
+a recovery prompt from repeatedly restarting the turn.
 
 ### UserPromptSubmit (usage tracking) — `track-usage.sh`
 
@@ -743,6 +747,10 @@ marked toolkit files while preserving user-owned hooks.
 
 ### Google Antigravity hooks (`.agents/hooks.json`)
 
+The current native contract has six events, including `SessionStart`. The
+toolkit intentionally wires the three handlers below; it does not claim that
+every documented event needs a toolkit handler.
+
 The toolkit owns only the top-level `ai-toolkit` namespace and preserves
 unrelated namespaces. It registers only the events whose adapter output does
 something: `PreToolUse` with the matcher `run_command`, `PreInvocation`, and
@@ -807,6 +815,13 @@ Copilot hooks follow GitHub's native [hooks reference](https://docs.github.com/e
 - **Ownership:** generated configs carry `AI_TOOLKIT_HOOK_OWNER=ai-toolkit`; unrelated hook files are not edited.
 
 ### Codex CLI hooks (`.codex/hooks.json`)
+
+The generated `SubagentStop` handler emits native JSON with an advisory
+`systemMessage`. Equivalent toolkit advisory/state handlers can deduplicate
+one invocation across global and project layers when native session/turn and
+agent/tool-call identity is available. Distinct versions, same-layer repeated
+calls, missing identity, permission guards and user hooks continue to run.
+`SessionStart` is not deduplicated without a reliable turn identity.
 
 Codex hooks follow the native [Codex hooks contract](https://learn.chatgpt.com/docs/hooks):
 

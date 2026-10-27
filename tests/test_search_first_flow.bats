@@ -282,3 +282,63 @@ LOG
     [ ! -f "$(FLAG_PATH sessA)" ]
     [ -f "$(FLAG_PATH sessB)" ]
 }
+
+@test "search-first: conversational handoffs and hook continuations do not arm the guard" {
+    run python3 - "$HOOKS" "$HOME" <<'PY'
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+hooks, home = map(Path, sys.argv[1:])
+environment = {**os.environ, "AI_TOOLKIT_SEARCH_FIRST": "strict"}
+prompts = [
+    "jak zrobisz merge to jeszcze jedna rzecz do sprawdzenia bedzie",
+    "Once you finish, I have another thing for you to check.",
+    "tak masz zgode na merge z --admin",
+    '<hook_prompt hook_run_id="stop:20">Step 0 violated: call smart_query first.</hook_prompt>',
+    'Step 0 violated: you responded to a technical prompt without calling smart_query() first.',
+]
+for prompt in prompts:
+    subprocess.run(["bash", str(hooks / "user-prompt-submit.sh")],
+                   input=json.dumps({"session_id": "conversation", "prompt": prompt}),
+                   env=environment, text=True, capture_output=True, check=True)
+    assert not (home / ".softspark/ai-toolkit/state/search-required-conversation.flag").exists(), prompt
+PY
+    [ "$status" -eq 0 ]
+}
+
+@test "search-first: an active Stop continuation clears its flag without blocking again" {
+    printf '0\nInvestigate a technical bug in the hook lifecycle\n' > "$(FLAG_PATH active)"
+    AI_TOOLKIT_SEARCH_FIRST=strict run bash -c "printf '%s' '{\"session_id\":\"active\",\"stop_hook_active\":true}' | bash '$HOOKS/stop-search-check.sh'"
+    [ "$status" -eq 0 ]
+    [ -z "$output" ]
+    [ ! -f "$(FLAG_PATH active)" ]
+}
+
+@test "search-first: a handoff containing a concrete technical task still requires search" {
+    run python3 - "$HOOKS" "$HOME" <<'PY'
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+hooks, home = map(Path, sys.argv[1:])
+environment = {**os.environ, "AI_TOOLKIT_SEARCH_FIRST": "strict"}
+prompts = [
+    "Once you finish, I have another task: investigate the failing OAuth callback tests",
+    "jak skonczysz merge kolejna rzecz to napraw błędną walidację tokenów",
+    "Once you finish, I have another thing for you to check: our access-control bug",
+    "jak zrobisz merge to jeszcze jedna rzecz do sprawdzenia: napraw błąd API",
+    "tak masz zgodę na merge i napraw błędną walidację tokenów",
+]
+for prompt in prompts:
+    subprocess.run(["bash", str(hooks / "user-prompt-submit.sh")],
+                   input=json.dumps({"session_id": "mixed-task", "prompt": prompt}),
+                   env=environment, text=True, capture_output=True, check=True)
+    assert (home / ".softspark/ai-toolkit/state/search-required-mixed-task.flag").exists(), prompt
+PY
+    [ "$status" -eq 0 ]
+}
